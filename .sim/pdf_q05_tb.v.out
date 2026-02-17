@@ -1,0 +1,96 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1539-g2693dd32b)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "C:\iverilog\lib\ivl\system.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\va_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2009.vpi";
+S_0000023628b85d40 .scope package, "$unit" "$unit" 2 1;
+ .timescale 0 0;
+S_0000023628b85ed0 .scope module, "pdf_q05_tb" "pdf_q05_tb" 3 4;
+ .timescale -9 -12;
+v0000023628bcfcf0_0 .var "a", 15 0;
+v0000023628bcfd90_0 .net "div_by_8", 15 0, L_0000023628b842c0;  1 drivers
+v0000023628bcfe30_0 .net "mul_by_4", 15 0, L_0000023628b83910;  1 drivers
+S_0000023628b52d70 .scope task, "check" "check" 3 14, 3 14 0, S_0000023628b85ed0;
+ .timescale -9 -12;
+v0000023628b53540_0 .var "v", 15 0;
+TD_pdf_q05_tb.check ;
+    %load/vec4 v0000023628b53540_0;
+    %store/vec4 v0000023628bcfcf0_0, 0, 16;
+    %delay 1000, 0;
+    %load/vec4 v0000023628bcfe30_0;
+    %load/vec4 v0000023628b53540_0;
+    %ix/load 4, 2, 0;
+    %flag_set/imm 4, 0;
+    %shiftl 4;
+    %cmp/ne;
+    %jmp/0xz  T_0.0, 6;
+    %vpi_call/w 3 19 "$display", "FAIL Q05 mul v=%h", v0000023628b53540_0 {0 0 0};
+    %vpi_call/w 3 19 "$finish" {0 0 0};
+T_0.0 ;
+    %load/vec4 v0000023628bcfd90_0;
+    %load/vec4 v0000023628b53540_0;
+    %ix/load 4, 3, 0;
+    %flag_set/imm 4, 0;
+    %shiftr 4;
+    %cmp/ne;
+    %jmp/0xz  T_0.2, 6;
+    %vpi_call/w 3 20 "$display", "FAIL Q05 div v=%h", v0000023628b53540_0 {0 0 0};
+    %vpi_call/w 3 20 "$finish" {0 0 0};
+T_0.2 ;
+    %end;
+S_0000023628b52f00 .scope module, "dut" "q05" 3 8, 4 1 0, S_0000023628b85ed0;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 16 "a";
+    .port_info 1 /OUTPUT 16 "mul_by_4";
+    .port_info 2 /OUTPUT 16 "div_by_8";
+L_0000023628bcffc0 .functor BUFT 1, C4<000>, C4<0>, C4<0>, C4<0>;
+v0000023628afb640_0 .net *"_ivl_10", 2 0, L_0000023628bcffc0;  1 drivers
+v0000023628af9960_0 .net *"_ivl_2", 13 0, L_0000023628bcfed0;  1 drivers
+L_0000023628bcff78 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0000023628b86060_0 .net *"_ivl_4", 1 0, L_0000023628bcff78;  1 drivers
+v0000023628b86100_0 .net *"_ivl_8", 12 0, L_0000023628b84680;  1 drivers
+v0000023628b53090_0 .net "a", 15 0, v0000023628bcfcf0_0;  1 drivers
+v0000023628b53130_0 .net "div_by_8", 15 0, L_0000023628b842c0;  alias, 1 drivers
+v0000023628bcfc50_0 .net "mul_by_4", 15 0, L_0000023628b83910;  alias, 1 drivers
+L_0000023628bcfed0 .part v0000023628bcfcf0_0, 0, 14;
+L_0000023628b83910 .concat [ 2 14 0 0], L_0000023628bcff78, L_0000023628bcfed0;
+L_0000023628b84680 .part v0000023628bcfcf0_0, 3, 13;
+L_0000023628b842c0 .concat [ 13 3 0 0], L_0000023628b84680, L_0000023628bcffc0;
+    .scope S_0000023628b85ed0;
+T_1 ;
+    %pushi/vec4 0, 0, 16;
+    %store/vec4 v0000023628b53540_0, 0, 16;
+    %fork TD_pdf_q05_tb.check, S_0000023628b52d70;
+    %join;
+    %pushi/vec4 1, 0, 16;
+    %store/vec4 v0000023628b53540_0, 0, 16;
+    %fork TD_pdf_q05_tb.check, S_0000023628b52d70;
+    %join;
+    %pushi/vec4 8, 0, 16;
+    %store/vec4 v0000023628b53540_0, 0, 16;
+    %fork TD_pdf_q05_tb.check, S_0000023628b52d70;
+    %join;
+    %pushi/vec4 240, 0, 16;
+    %store/vec4 v0000023628b53540_0, 0, 16;
+    %fork TD_pdf_q05_tb.check, S_0000023628b52d70;
+    %join;
+    %pushi/vec4 32769, 0, 16;
+    %store/vec4 v0000023628b53540_0, 0, 16;
+    %fork TD_pdf_q05_tb.check, S_0000023628b52d70;
+    %join;
+    %vpi_call/w 3 30 "$display", "PASS Q05" {0 0 0};
+    %vpi_call/w 3 31 "$finish" {0 0 0};
+    %end;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 5;
+    "N/A";
+    "<interactive>";
+    "-";
+    "C:\Users\kapil\OneDrive\Desktop\Practiceverilog\tb\pdf_q05_tb.v";
+    "./qa/pdf_q03_q06/q05_shift_operations.v";

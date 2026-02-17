@@ -1,0 +1,84 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1539-g2693dd32b)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "C:\iverilog\lib\ivl\system.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\va_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2009.vpi";
+S_000001e4376d5b70 .scope package, "$unit" "$unit" 2 1;
+ .timescale 0 0;
+S_000001e4376d5d00 .scope module, "pdf_q06_tb" "pdf_q06_tb" 3 4;
+ .timescale -9 -12;
+v000001e4376d44f0_0 .var "a", 4 0;
+v000001e4376d4590_0 .net "c", 9 0, L_000001e4376d4770;  1 drivers
+S_000001e4376a2d70 .scope task, "check" "check" 3 13, 3 13 0, S_000001e4376d5d00;
+ .timescale -9 -12;
+v000001e4376a3540_0 .var "exp", 9 0;
+v000001e43749af30_0 .var "v", 4 0;
+TD_pdf_q06_tb.check ;
+    %load/vec4 v000001e43749af30_0;
+    %store/vec4 v000001e4376d44f0_0, 0, 5;
+    %load/vec4 v000001e43749af30_0;
+    %parti/s 1, 4, 4;
+    %replicate 5;
+    %load/vec4 v000001e43749af30_0;
+    %concat/vec4; draw_concat_vec4
+    %store/vec4 v000001e4376a3540_0, 0, 10;
+    %delay 1000, 0;
+    %load/vec4 v000001e4376d4590_0;
+    %load/vec4 v000001e4376a3540_0;
+    %cmp/ne;
+    %jmp/0xz  T_0.0, 6;
+    %vpi_call/w 3 21 "$display", "FAIL Q06 a=%b exp=%b got=%b", v000001e43749af30_0, v000001e4376a3540_0, v000001e4376d4590_0 {0 0 0};
+    %vpi_call/w 3 22 "$finish" {0 0 0};
+T_0.0 ;
+    %end;
+S_000001e4376a2f00 .scope module, "dut" "q06" 3 8, 4 1 0, S_000001e4376d5d00;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 5 "a";
+    .port_info 1 /OUTPUT 10 "c";
+v000001e4376d5e90_0 .net *"_ivl_1", 0 0, L_000001e4376d4630;  1 drivers
+v000001e4376d5f30_0 .net *"_ivl_2", 4 0, L_000001e4376d46d0;  1 drivers
+v000001e4376a3090_0 .net "a", 4 0, v000001e4376d44f0_0;  1 drivers
+v000001e4376a3130_0 .net "c", 9 0, L_000001e4376d4770;  alias, 1 drivers
+L_000001e4376d4630 .part v000001e4376d44f0_0, 4, 1;
+LS_000001e4376d46d0_0_0 .concat [ 1 1 1 1], L_000001e4376d4630, L_000001e4376d4630, L_000001e4376d4630, L_000001e4376d4630;
+LS_000001e4376d46d0_0_4 .concat [ 1 0 0 0], L_000001e4376d4630;
+L_000001e4376d46d0 .concat [ 4 1 0 0], LS_000001e4376d46d0_0_0, LS_000001e4376d46d0_0_4;
+L_000001e4376d4770 .concat [ 5 5 0 0], v000001e4376d44f0_0, L_000001e4376d46d0;
+    .scope S_000001e4376d5d00;
+T_1 ;
+    %pushi/vec4 0, 0, 5;
+    %store/vec4 v000001e43749af30_0, 0, 5;
+    %fork TD_pdf_q06_tb.check, S_000001e4376a2d70;
+    %join;
+    %pushi/vec4 5, 0, 5;
+    %store/vec4 v000001e43749af30_0, 0, 5;
+    %fork TD_pdf_q06_tb.check, S_000001e4376a2d70;
+    %join;
+    %pushi/vec4 15, 0, 5;
+    %store/vec4 v000001e43749af30_0, 0, 5;
+    %fork TD_pdf_q06_tb.check, S_000001e4376a2d70;
+    %join;
+    %pushi/vec4 16, 0, 5;
+    %store/vec4 v000001e43749af30_0, 0, 5;
+    %fork TD_pdf_q06_tb.check, S_000001e4376a2d70;
+    %join;
+    %pushi/vec4 21, 0, 5;
+    %store/vec4 v000001e43749af30_0, 0, 5;
+    %fork TD_pdf_q06_tb.check, S_000001e4376a2d70;
+    %join;
+    %vpi_call/w 3 33 "$display", "PASS Q06" {0 0 0};
+    %vpi_call/w 3 34 "$finish" {0 0 0};
+    %end;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 5;
+    "N/A";
+    "<interactive>";
+    "-";
+    "C:\Users\kapil\OneDrive\Desktop\Practiceverilog\tb\pdf_q06_tb.v";
+    "./qa/pdf_q03_q06/q06_sign_extension.v";

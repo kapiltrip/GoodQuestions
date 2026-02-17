@@ -1,0 +1,166 @@
+Folder Deep Inventory (Names Only)
+Folder Name: Practiceverilog
+Generated: 2026-02-10 19:22:59
+
+Direct Subfolder Count: 3
+Direct File Count: 2
+All Nested Subfolder Count: 21
+All Nested File Count: 66
+
+Direct Subfolders (Names):
+- notes
+- qa
+- tb
+
+Direct Files (Names):
+- _ocr_till20.txt
+- README.md
+
+All Subfolder Names (Recursive):
+- notes
+- qa
+- qa\pdf_q03_q06
+- qa\pdf_q07_q11
+- qa\pdf_q12_q18
+- qa\pdf_q19_q20
+- qa\pdf_q21
+- qa\pdf_q22_q23
+- qa\pdf_q24
+- qa\pdf_q25_q26
+- qa\pdf_q27
+- qa\q01_mux
+- qa\q02_ff
+- qa\q03_edge_detect
+- qa\q04_rise_pulse
+- qa\q05_seq_10110
+- qa\q06_detect
+- qa\q07_start_and_chipselects
+- qa\q08_sync_debounce_onepulse
+- qa\q09_gray
+- tb
+
+Contents Inside Each Subfolder (Names Only):
+
+Subfolder: notes
+  [FILE] pdf_q01_q02_theory.md
+  [FILE] pdf_q08_q11_theory.md
+  [FILE] pdf_q14_q18_theory.md
+  [FILE] pdf_q19_q20_theory.md
+  [FILE] pdf_q21_theory.md
+  [FILE] pdf_q22_q23_theory.md
+  [FILE] pdf_q24_theory.md
+  [FILE] pdf_q25_q26_theory.md
+  [FILE] pdf_q27_theory.md
+
+Subfolder: qa
+  [DIR]  pdf_q03_q06
+  [DIR]  pdf_q07_q11
+  [DIR]  pdf_q12_q18
+  [DIR]  pdf_q19_q20
+  [DIR]  pdf_q21
+  [DIR]  pdf_q22_q23
+  [DIR]  pdf_q24
+  [DIR]  pdf_q25_q26
+  [DIR]  pdf_q27
+  [DIR]  q01_mux
+  [DIR]  q02_ff
+  [DIR]  q03_edge_detect
+  [DIR]  q04_rise_pulse
+  [DIR]  q05_seq_10110
+  [DIR]  q06_detect
+  [DIR]  q07_start_and_chipselects
+  [DIR]  q08_sync_debounce_onepulse
+  [DIR]  q09_gray
+
+Subfolder: qa\pdf_q03_q06
+  [FILE] q03_logic_gates.v
+  [FILE] q04_bitwise_reduction.v
+  [FILE] q05_shift_operations.v
+  [FILE] q06_sign_extension.v
+
+Subfolder: qa\pdf_q07_q11
+  [FILE] q07_mux4_styles.v
+  [FILE] q09_ff_reset_styles.v
+  [FILE] q10_latch_and_flop.v
+  [FILE] q11_edge_detect.v
+
+Subfolder: qa\pdf_q12_q18
+  [FILE] q12_one_cycle_pulse_detect.v
+  [FILE] q13_seq_10110_fsms_abcd.v
+  [FILE] q14_last5_detect_10110.v
+  [FILE] q15_start_and_chipselects.v
+  [FILE] q16_sync_debounce_onepulse.v
+  [FILE] q17_gray_counter_methods.v
+  [FILE] q18_fifo_sync_dualport.v
+
+Subfolder: qa\pdf_q19_q20
+  [FILE] q19_divisible_by3_fsm.v
+  [FILE] q20_fibonacci_enable.v
+
+Subfolder: qa\pdf_q21
+  [FILE] q21_max_and_second_max_onecmp.v
+
+Subfolder: qa\pdf_q22_q23
+  [FILE] q22_time_ticks.v
+  [FILE] q23_timing_b_from_a.v
+
+Subfolder: qa\pdf_q24
+  [FILE] q24_fir_5tap.v
+
+Subfolder: qa\pdf_q25_q26
+  [FILE] q25_clock_div2.v
+  [FILE] q26_clock_div3_duty50.v
+
+Subfolder: qa\pdf_q27
+  [FILE] q27_clock_div_n.v
+  [FILE] q27_clock_divider_variants.v
+
+Subfolder: qa\q01_mux
+  [FILE] mux2_behavioral.v
+  [FILE] mux2_dataflow.v
+  [FILE] mux2_gatelevel.v
+
+Subfolder: qa\q02_ff
+  [FILE] dff_async_reset.v
+  [FILE] dff_sync_reset.v
+
+Subfolder: qa\q03_edge_detect
+  [FILE] edge_detect_both.v
+
+Subfolder: qa\q04_rise_pulse
+  [FILE] edge_to_1cycle_pulse.v
+
+Subfolder: qa\q05_seq_10110
+  [FILE] seq_10110_fsms.v
+
+Subfolder: qa\q06_detect
+  [FILE] detect.v
+
+Subfolder: qa\q07_start_and_chipselects
+  [FILE] start_and_chipselects.v
+
+Subfolder: qa\q08_sync_debounce_onepulse
+  [FILE] sync_debounce_onepulse.v
+
+Subfolder: qa\q09_gray
+  [FILE] gray_blocks.v
+
+Subfolder: tb
+  [FILE] pdf_q03_tb.v
+  [FILE] pdf_q04_tb.v
+  [FILE] pdf_q05_tb.v
+  [FILE] pdf_q06_tb.v
+  [FILE] pdf_q07_tb.v
+  [FILE] pdf_q09_tb.v
+  [FILE] pdf_q10_tb.v
+  [FILE] pdf_q11_tb.v
+  [FILE] q01_mux_tb.v
+  [FILE] q02_ff_tb.v
+  [FILE] q03_edge_detect_async_d_tb.v
+  [FILE] q03_edge_detect_tb.v
+  [FILE] q04_rise_pulse_tb.v
+  [FILE] q05_seq_10110_tb.v
+  [FILE] q06_detect_tb.v
+  [FILE] q07_start_and_chipselects_tb.v
+  [FILE] q08_sync_debounce_onepulse_tb.v
+  [FILE] q09_gray_tb.v

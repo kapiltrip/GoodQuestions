@@ -1,0 +1,17 @@
+module q03 (
+    input  wire a,
+    input  wire b,
+    output wire and_y,
+    output wire or_y,
+    output wire xor_y,
+    output wire nand_y,
+    output wire nor_y,
+    output wire xnor_y
+);
+    assign and_y  = a & b;
+    assign or_y   = a | b;
+    assign xor_y  = a ^ b;
+    assign nand_y = ~(a & b);
+    assign nor_y  = ~(a | b);
+    assign xnor_y = ~(a ^ b);
+endmodule

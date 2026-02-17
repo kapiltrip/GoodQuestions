@@ -1,0 +1,741 @@
+
+=== PAGE 1 ===
+1.Whatis the difference between blocking and
+non-block statements, and when are they used?
+Blocking statements are coded in Verilog with the = operator, and
+are used when creating combinatorial logic. This operator blocks the
+simulator from executing subsequent statements until the current
+evaluation and assignment is done. Consider the following code (E is
+assigned the immediate new value of C):
+A
+assignC=B&A;
+assignE=C| D;
+Blocking Statements and Equivalent Gates (Fig. 1)
+Non-blocking statements are coded in Verilog with <= operator,
+are always used when coding flip flops inside a clocked process. The
+assignment is postponed until all the subsequent statements are evaluated.
+This allows for parallel or concurrent execution of statements. In this
+example, E is assigned the previous value of C (not the immediate):
+always@(posedgeclk) begin
+C<=B&A;//parallel statement
+E<=C|D;//parallel statement
+end
+Non-blocking Statements and Equivalent Gates (Fig. 2)
+VerilogCode.com
+VerilogCode.com
+
+=== PAGE 2 ===
+2. Explain the difference between logical and bitwise
+operators
+In Verilog, you should understand the different syntax used for
+writing conditional if statement operations compared to writing code for
+creating logical gates with bitwise operations.
+For bitwise operations resulting in an AND gate, use the & operator
+assign C = A & B; //This will create an and gate
+For conditional and if statements, use the && operator
+if ( cond1 == 1'b1 && cond2 == 1'b1) {...}
+Operator: & versus && (Ex. 1)
+loqical.
+simt.d
+For bitwise operations resulting in an OR gate, use the | operator
+assign C = A I B; //This will create an or gate
+For conditional or if statements , use the || operator
+if ( cond1 == 1'b1 Il cond2 == 1'b1) (..})
+Operator: | versus I| (Ex. 2 )
+For bitwise operations resulting ininverter gate, use the ~ operator
+assign A = ~B; //This will create an inverter
+For conditional not if statements, use the !
+if (!cond1) (... )
+Operator: ~ versus ! (Ex. 3)
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 3 ===
+3. Write code for logic gates: and, or, xor, nand, nor,
+xnor
+assign C= (A & B); I/AND gate
+assign C= (A I B); //OR gate
+assign C= (A^ B); //XOR gate
+assign C= ~(A & B); //NAND gate
+assign C= ~(A I B); //NOR gate
+assign C=~(A^ B); //XNOR gate
+Bitwise Operators (Ex. 4)
+4. How can you bitwise reduce a multibit signal?
+wire [15:0] databus;
+wire all_ones_detected;
+wire is_databus_odd;
+wire signal_not_zero;
+assign all_ones_detected = &databus; // AND all the bits together;
+assign is_databus_odd 
+d= ^databus; // xOR all the bits together;
+assign signal_not_zero = Idatabus; //  OR all the bits together;
+Bitwise Reduction (Ex. 5)
+5. What code multiplies or divides by powers of 2?
+assign C = A << 2; // shift left ( multiply by 4)
+assign C = A >> 3; // shift right (division by 8)
+Shift Operations (Ex. 6)
+6. How would you perform sign extension?
+reg [4:0] A;
+wire [9:0] C;
+assign C = { {5{A[4]}] ,A]; // sign extension
+Concatenation Operations (Ex. 7)
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 4 ===
+7. What are three ways to code a 4:1 mux in Verilog?
+Assume the 4:1 mux inputs are named °A, B, C, D', you will need
+a 2-bit select line (to choose between 4 inputs) and have a 1-bit output:
+Coding Style 1:
+assign output = (select == 2'b00 ) ? A :
+(select == 2'b01) ? B : 
+(select ==2'b10) ? C : D;
+Coding Style 2:
+always @(*)
+if (select == 2'b00)
+output <= A;
+else if (select == 2'b01)
+output <= B;
+else if (select == 2'b10)
+output <=C;
+else
+output <= D;
+Coding Style 3:
+always @(*)
+case (select):
+2'b00: output <= A;
+2'b01: output <= B;
+2'b10: output <= C;
+2'b11:output <=D;
+end case;
+Verilog coding styles for a 4:1 mux (Ex. 8)
+You could also instantiate a mux cell directly if it exists in your library.
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 5 ===
+8. What circuit would synthesis create for previous
+mux coding styles?
+Coding Styles 1 and 2 are equivalent circuits but use different
+coding styles, and both produce a priority encoder (path A is highest)
+Style 1:
+Synthesis Results
+assign output = (select == 2'boo) ? A :
+(Priority Encoder)
+(select == 2'b01) ? B :
+(select ==2'b10) ? C :
+select
+D;
+decode
+Style 2:
+always @(*)
+if (select == 2'b00)
+output <= A;
+else if (select == 2'b01)
+output <= B;
+else if (select ==2'b10)
+output <=C;
+else
+output <= D;
+Priority Encoder (Ex. 9)
+Style 3
+Synthesis Results
+always @(*)
+(Parallel CaseMux)
+case (select):
+2'b00: output <= A;
+select
+2'b01: output <= B;
+2'b10: output <= C;
+ABCD
+2'b11:output <=D;
+end case;
+Parallel Muxing Scheme using full case statement (Ex. 10)
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 6 ===
+. Write Code for Asynchronous/Synchronous Flip
+Flops and discuss the pros and cons of each
+Asynchronous
+Synchronous
+always @(posedge clk or
+always @(posedge clk)
+negedge rst)
+If (!rst )
+Verilog
+If (!rst )
+Q<= #1 1'b0;
+Code
+Q<= #1 1'b0;
+else
+else
+Q<= #1 D;
+Q<= #1 D;
+rst
+D
+Schematic
+clk
+clk
+Pros
+No need for clocks to be running
+No need to worry about
+asynchronous timing
+Any glitch on reset signal will
+reset flops (If there are cross
+Need to time both the
+clock domain paths, then you
+Cons
+assertion of reset and
+need to synchronize the reset to
+also deassertion of reset
+each clock domain). Need to
+time the removal of reset
+Asynchronous versus Synchronous Flip Flops (Table 1)
+Author's Tip: The questions so far has focused on Verilog syntax.
+Basic syntax questions can easily be looked up on Google (after you
+have a job), however, on a job interview it's important to be prepared
+for these questions and knock them out of the park.
+VerilogCode.com
+VerilogCode.cun
+
+=== PAGE 7 ===
+A0. Write Verilog to capture input below with a latch
+and a flip flop, and draw the timing outputs of each.
+Clock
+input
+Timing Diagram - capture input into a latch and flip flop (Fig. 3)
+//purposely coding latch
+always @(clk or input)
+if (clk == 1'b1)
+Q_latch <= input;
+/flipflop coding a Latch
+always @(posedge clk)
+Q_flop <= #1 input;
+Verilog code for Latch and Flip Flop (Ex. 11)
+The outputs of the latch and flip flop is below in the timing diagram:
+input
+O_lop
+O_latch
+Latch vs. Flip Flop timing diagram (Fig. 4)
+The output of the flip flop only changes on the rising edge of clock, and
+will equal the value of the input captured at the rising edge of clock.
+The
+latch output will follow the input signal while the latch is open (in this
+case while clock is high). When the latch closes (clock is low), the output
+holds its previous value.
+VerilogCode.com
+VerilogCode.com
+
+=== PAGE 8 ===
+olvoy@ C poseelog cll)
+11. Design a circuit that can detect if an input signal
+transitions in either direction. Draw a timing diagram.
+For this answer let's assume there is a clock available, and also the
+input signal D is on the same clock domain as our circuit. As with all
+interview questions, you should state your assumptions before answering
+the questions or confirm with the interviewer so you are both on the same
+page.
+The easiest way to detect if an input signal has changed it simply
+compare current signal at time T to the previous version of the signal at
+time t-1. Therefore, a flip flop is used to capture the signal, and then you
+can compare it to the previous version of the same signal:
+//capture the signal to have a delayed version
+always @ ( posedge clk or negedge reset)
+if (~reset)
+Q<= #1 1'b0;
+else
+Q<= #1 D;
+//detectsignaltransitions
+assignToggle=(Q^D);//xor gate
+assign Falling = ~D & Q; / /D is low, but was high
+assign Rising = D & ~Q; // D is high, but was low
+Verilog Code for Edge Detection (Ex. 12)
+Toggle
+D
+Q
+D
+Falling
+Rising
+Equivalent Gates from RTL code in Ex. 11 (Fig. 5)
+VerilogCode.com
+VerilogCode.cumh
+
+=== PAGE 9 ===
+The timing diagram is shown below. This waveform was drawn
+with tool called TimeGen, downloaded from XFusionSoftware.com:
+5
+Clock
+Q
+Rising
+Falling
+Toggle
+Timing Diagram for Edge Detection using clocks (Fig. 6)
+12. Design a circuit to detect a 1 cycle pulse input
+Using delay states to remember the state of the signal for previous two
+cycles, you can simple check for O, 1, then O. You could also use an FSM.
+//capture the signal and delay 2 cycles
+always @ ( posedge clk or negedge reset)
+if (~reset) begin
+ASy·
+Q1<= #1 1'b0;
+Q2<= #11'b0;
+end
+else begin
+Q1<= #1 D;//delayT-1
+Q2<=#1Q1; //delayT-2
+end;
+assign pulse_high=~D &Q1 &~Q2;
+Circuit to detect pulse (Ex. 13)
+VerilogCode.com
+VerilogCode.com
+
+=== PAGE 10 ===
+13. Design a sequence detector for the pattern: 10110
+One method is to design a FSM to detect the sequence. If the FSM
+reaches state 5, then generate a valid output pulse (all the other states will
+output low). It's also important to make sure you go back to correct state
+if the wrong value comes in (you don't always need to go back to idle
+state). You need to check if some of the sequence has already started and
+go back to the appropriate state.
+FSM
+Idle
+1,0,1,1,0
+State
+one
+State
+zero
+0
+State
+one
+State
+one
+0
+State
+zero
+Sequence Detector using FSM (Fig. 7)
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 11 ===
+nmic chown below.This waveform wasdrawn
+14. Detect if pattern 10110 appears in the last 5 inputs
+To detect a pattern, we just need to design a decoder circuit. You
+could use shift registers and then add combinatorial logic to decode the
+string to check for a match. Whenever the values match, a pulse is
+generated. Be sure to clarify with the interviewer if the circuit needs to
+start over if the sequence is wrong (or if they want you to just detect
+anytime the pattern appears). If you need to detect the sequence, then you
+will need a state machine in the previous example.
+The method below requires N number of shift registers to hold the
+length of the string or the sample window. Also, this circuit will always
+output trueif thestringmatches.
+ExternalInput
+CLK
+Decoder Circuit - Shift Register and Combinatorial Logic (Fig. 8)
+Author's Tip: Be sure to understand if the interview question requires
+a FSM or a simple decode.Also,how would you work the above
+exampleif thequestion changed to detect thepatternin thelast8
+samples? The answer is to use a 8 bit shift register,and then decode for
+the appropriate sequence after output of each stage. Then you will
+need to logically or the outputs of each stage
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 12 ===
+15. Given the timing diagram, write the Verilog code to
+produce the Start signal and the chipselects:
+10
+counter
+Clock
+=26
+md
+Start
+CS1
+CS2
+CS3
+Mowi
+Write the Verilog code to produce the above waveform (Fig. 9)
+oul's
+gtlerng
+//generatea counterto3(used tocreatestartpulse)
+rellfeua
+always @(posedge clk or negedge rst)
+if (!rst)
+counter<=2'b00;
+else if (counter==2'b10)
+counter<= 2'b00;
+else
+counter<=counter+ 1'b1;
+assign start = (counter == 2'b01) ? 1'b1 : 1'b0; // start pulse
+always @(posedge clk or negedge rst)
+nmblotn
+if (!rst)
+cs <= 3'b000;
+else if (start == 1'b1)
+agm(s=stat-(o==2@1)
+1
+begin
+case (cs):
+3'b000:cs<=3'b001;
+usee
+3'b001:cs<=3'b010;
+3'b010:cs<=3'b100;
+3'b100:cs<=3'b000;
+default:cs<=3'b000;
+endcase
+end
+assign CS1=cs[0];assign Cs2= cs[1];assign CS3= cs[2];
+Example Verilog Code for above waveform (Ex. 14)
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 13 ===
+14.Detect if pattern 10110 appears in the last 5 inputs
+To detect a pattern, we just need to design a decod-
+could use shift registers and then add comh:.
+string to check for a match.Im
+generated. Be c..
+lroy
+(m)@
+rsd-n
+-n)
+mobperogSom
+-7
+Syrehrenou
+16. Design a debounce circuit which removes glitches,
+with the following assumptions:
+1)
+Assume the input signal is driven from an asynchronous clock.
+2)
+Generate a pulse when the signal transitions from low-to-high.
+3)
+The circuit should filter out any noise or glitches on the input
+signal. The input signal must be valid high for at least 2 clocks
+Since the question said to assume the external input signal is driven from
+an asynchronous clock, the circuit we need to design must use a
+Debance
+synchronizer on the input.
+9mq
+pyItohxmekengeolae
+①=delayd
+External Input
++nintndel
+Q1
+Q2
+l=@layly
+tnmellin>.
+Jone
+Berglitca Guloring
+CLK
+hou—ortt
+Bulinng
+Classic Synchronizer Circuit using 2 Flip Flops (Fig. 10)
+HQ = cuuunt
+After the synchronizers, the signal must be delayed two more
+Srchrmgd
+cycles so we can check that is is still valid, and to also detect a rising edge.
+cb=180
+pulse
+LIsampe
+External Input
+Q1
+=92
+CLK
+asammpuy
+Circuit to detect low to high transition (Fig. 11)
+VerilogCode.com
+VerilogCode.cui
+
+=== PAGE 14 ===
+gnn aCount
+you or yuel
+ul(n)>theg
+Counlin
+bunarry
+17. Write Verilog Code to generate a Gray Code counter
+A valid question for a digital designer is to write RTL code to
+generate gray code. I've seen two ways to accomplish this. The first
+method is straightforward code without any tricks. The second method is
+a quicker method and something you should be aware to translate binary
+counter to gray code counter.
+Below is RTL code written to generate a 3-bit gray code counter:
+always @(posedge clk or negedge rst)
+loehug
+Wom
+if (!rst)
+am L uang
+counter <= #1 3'b000;
+else
+counter<=#1 counter + 1;
+end
+always @(counter)
+case (counter):
+brror
+3'b000 : 
+ gray_output <= 3'b000;
+3'b001 :
+gray_output <= 3'b001;
+3'b010 :
+gray_output <= 3'b011;
+3'b011 :
+gray_output <= 3'b010;
+3'b100 :
+gray_output <= 3'b110;
+3'b101 :
+gray_output <= 3'b111;
+3'b110 :
+gray_output <= 3'b101;
+3'b111:
+gray_output <= 3'b100; ——
+default:
+gray_output <= 3'b000;
+KO
+end case;
+Verilog Code for 3-bit Gray Code (Ex. 15)
+Onelogical solution would be to create a 3-bit register and use it as
+binary counter that is incremented by 1 each clock cycle.A signal
+named "gray_output” decodes the binary counter and then generates the
+new gray code output.The problem with this approach is for a N-bit
+VerilogCode.com
+VerilogCode.cvr
+[+
+bin(P)=
+e-n=
+-
+C-Mfb
+
+=== PAGE 15 ===
+counter you need to explicitly decode rite each state.A better, more
+generic solution using an XOR gate is presented below:
+BCD
+Gray Code
+0000
+0000
+0001
+0001
+BCD[3]
+G[3]
+0010
+0011
+0011
+0010
+G[2]
+BCD[2]
+0100
+0110
+0101
+G[1]
+0111
+BCD[1]
+0110
+0101
+BCD[0]
+G[0]
+0111
+0100
+1000
+1100
+1111
+1000
+BCD to Gray Code (Fig. 12)
+always @(posedge clk or negedge rst)
+if (!rst)
+bcd_counter <= #1 4'b0000;
+else
+bcd_counter <= #1 bcd_counter + 1; // binary counter
+end
+//convert binary to gray code
+assign gray_code = { bcd_counter[3] ,
+bcd_counter[3] ~ bcd_counter[2],
+bcd_counter[2] ~ bcd_counter[1],
+bcd_counter[1] ~ bcd_counter[0]}
+Verilog code to convert BCD to Gray Code (Ex. 16)
+Author's Tip: I was asked some variation of a gray coding question on
+80% of my interviews. It is important in today's low power design (
+since only 1 bit toggles saving dynamic power). Also, gray coding can
+be used to send a multi-bit vector across clock domains (after classic
+double synchronization).
+VerilogCode.com
+VerilogCode.cumn
+
+=== PAGE 16 ===
+read_address<=#18'b0000_0000;//256locations
+else if (pop == 1'b1)
+read_address<= #1 read_address +1'b1;
+//generateFiFO count
+// increment on push, decrement on pop
+always @(posedge clk or negedge rst)
+if (!rst)
+fifo_count <= #1 8'b0000_0000; //256 locations
+else if (push == 1'b1 && pop == 1'b0)
+fifo_count<= #1 ffio_count +1;
+else if (push == 1'b0 && pop == 1'b1)
+fifo_count <= #1 ffio_count - 1;
+//generate FIFO signals
+assign fifo_full
+= (fifo_count == 8'b1111_1111) ? 1'b1 : 1'b0;
+'0q,1 : 1a,1 e (1111 119,8 == yunoo o!) = Adwa o! uaisse
+//Connect RAM
+i_ram RAM ( .clk (clk), .rst(rst), .write(push),
+.write_address(write_address), .write_data(data_in), .read_address
+(read_address), .read_data(data_out);
+FIFO control logic (Ex. 17)
+Author's Tip: Note this solution presented uses a fifo count register
+(which adds another 8 registers) . Another method which saves area is
+to extend the write and read address pointers by 1 extra bit. When the
+pointers are equal, the fifo is empty. When the MSBs are different,
+but remaining bits[7:0] are equal, the fifo is full.
+Also note that if this question used asynchronous clock domains, the
+circuitwould need tosynchronize anysignals thatcross domainssuch
+as fifo full or empty. But when you pass these signals across domains,
+the synchronization causes an extra delay (due to the sync flop) which
+would lead to overflows and underflows. To solve this, you can use
+gray coded write and read address pointers. The gray coded address
+pointers are then synchronized into the opposite clock domains, and
+then synchronously generates fifo_full and fifo_empty.
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 17 ===
+18. Design a FIFO module that pushes and pops data
+using a dual port RAM. The FIFO logic should generate
+a fifo full signal and a fifo empty signal. (Assume both
+sides of FIFO are synchronous for write and read inputs)
+Dual PortRAM datasheet
+Inputs/Outputs: (inputs clk, rst, write, write_address, write_data,
+read_address; output read_data);
+Description: : A dual port RAM allows both writes and reads to occur
+simultaneously to different address locations by using separate write
+and read address ports.
+Writes: When the write signal is asserted high, data on the write_data
+bus is written into location pointed to by write_adresss.
+Reads:Theread addresspointstoalocation toretrieve thedataon
+put onto the read_data bus.
+WidthxDepth:TheRAMcanstore256entries
+The code is listed below which generates the FIFO control logic:
+module FIFO
+Buu
+input wire clk, rst, push, data_in, pop, data_in;
+outputs fifio_full, fifo_empty, data_out);
+reg[7:0] write_address;
+reg[7:0] read_address;
+reg[7:0] fifo_count;
+//generate internal write address
+always @(posedge clk or negedge rst)
+if (!rst)
+write_address <= #1 8'b0000_0000; //256 locations
+else if (push == 1'b1)
+write_address<= #1 write_address +1'b1;
+//generate internal read addresspointer
+always @(posedge clk or negedge rst)
+if (lrst)
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 18 ===
+19. Design a circuit to detect if a number is divisible by
+3. The input to the circuit will be a single bit (either 0
+or 1). Assume each input bit will be shifted into the
+LSB location. The output of the circuit should be 1 if
+the binary number received so far is divisible by 3.
+The trick to this is to divide the binary number by 3 and then check
+the modulo value. The maximum number of states we could have based
+on the modulo results is just 3 (mod 0, mod 1, or mod 2).
+Our FSM will start in state O which represents that the number is
+divisible by 3. If the module is 1, then we go to state 1. If modulo is 0,
+we go back to state 0 (and generate div_by_3 high). Each state represents
+the module value.
+For this example, let's assume the first input bit is
+0, then 1, 1,0,1,0,0,1:
+binary num
+Div by 3?
+State
+0
+yes
+mod0
+01
+no
+mod1
+mod_0
+011
+yes
+mod0
+0110
+yes
+mod0
+01101
+ou
+mod1
+011010
+ou
+mod2
+0110100
+ou
+mod 1
+mod_1
+01101001
+yes
+modo
+assign div_by_3=(fsm ==mod_0) ? 1'b1: 1'b0;
+mod_2
+FSM states for divisible by 3 circuit (Ex. 18)
+Author's Tip: You should practice other divisible values such as 4 or 5
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 19 ===
+20. Design a circuit to generate the Fibonacci series.
+The circuit should have an enable signal which allows
+the circuit to operate. When enable is low, the circuit
+should not advance to the next number.
+By definition, the first two numbers in the Fibonacci sequence are
+O and 1, and the next number in the sequence is calculated by adding
+together the previous two numbers. For example: 0, 1, 1, 2, 3, 5, 8, 13,
+Since the circuit must self generate the sequence, the design must
+have at least 2 registers to hold the starting numbers of O and 1.
+//Define registers and signals
+input wire clk, rst, enable;
+output wire [31:0] sum;
+reg [31:0] cur_num;
+reg [31:0] next _num;
+always @(posedge clk or negedge rst)
+if (!rst)
+cur_num <= #1 32'b0; //initialize to 0
+else if (enable == 1'b1)
+cur_num <= #1 next_num ;
+end
+always @(posedge clk or negedge rst)
+if (!rst)
+next _num <= #1 32'b1; //initialize to 1
+else if (enable = 1'b1)
+next_num <= #1 sum;//save the sum
+end
+//The output is the sum of the two numbers
+assign sum = Q1 + Q2 ;
+Verilog code for Fibonacci Generation (Ex. 19)
+VerilogCode.com
+VerilogCode.cum
+
+=== PAGE 20 ===
+Below is the equivalent block level diagram that illustrates what
+the previous Verilog code will create:
+Enable
+curnum
+nextnum
+CLK
+CLK
+Sum
+Circuit to Generate Fibonacci Series (Fig. 13)
+For further preparation, you should try to convert other
+mathematical or computer science algorithms from software to a digital
+circuit.
+Author's Tip: You should also understand the different tradeoffs and
+relationships between power, performance, and area when making
+decisions about the architecture of a digital circuit. That is,
+understanding the concept of getting better performance (by using
+parallel hardware which uses more area) compared to using least
+amount of gates (resource sharing) and doing things slower over more
+clock cycles.
+VerilogCode.com
+VerilogCode.cum
