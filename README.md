@@ -18,7 +18,7 @@
 | 12 | Design a circuit to detect a 1-cycle pulse input | Code | [qa/pdf_q12_q18/q12_one_cycle_pulse_detect.v](qa/pdf_q12_q18/q12_one_cycle_pulse_detect.v) |
 | 13 | Sequence detector for pattern `10110` (4 FSM variants) | Code (single file, variants A/B/C/D) | [qa/pdf_q12_q18/q13_seq_10110_fsms_abcd.v](qa/pdf_q12_q18/q13_seq_10110_fsms_abcd.v) |
 | 14 | Detect if pattern `10110` appears in the last 5 inputs | Code + Theory | [qa/pdf_q12_q18/q14_last5_detect_10110.v](qa/pdf_q12_q18/q14_last5_detect_10110.v), [notes/pdf_q14_q18_theory.md](notes/pdf_q14_q18_theory.md) |
-| 15 | Generate `start` and rotating `chip_select` pulses from timing | Code | [qa/pdf_q12_q18/q15_start_and_chipselects.v](qa/pdf_q12_q18/q15_start_and_chipselects.v) |
+| 15 | Generate `start` and rotating `chip_select` pulses from timing | Code + Theory | [qa/pdf_q12_q18/q15_start_and_chipselects.v](qa/pdf_q12_q18/q15_start_and_chipselects.v), [notes/pdf_q14_q18_theory.md](notes/pdf_q14_q18_theory.md) |
 | 16 | Debounce/synchronize async input and output one pulse on valid rise | Code | [qa/pdf_q12_q18/q16_sync_debounce_onepulse.v](qa/pdf_q12_q18/q16_sync_debounce_onepulse.v) |
 | 17 | Generate Gray code counter (table method + XOR method) | Code + Theory | [qa/pdf_q12_q18/q17_gray_counter_methods.v](qa/pdf_q12_q18/q17_gray_counter_methods.v), [notes/pdf_q14_q18_theory.md](notes/pdf_q14_q18_theory.md) |
 | 18 | Design synchronous FIFO with dual-port RAM, full/empty flags | Code + Theory | [qa/pdf_q12_q18/q18_fifo_sync_dualport.v](qa/pdf_q12_q18/q18_fifo_sync_dualport.v), [notes/pdf_q14_q18_theory.md](notes/pdf_q14_q18_theory.md) |
@@ -34,3 +34,7 @@
 | 28 | Design a glitch-free clock gating cell with enable | Code + Theory | [qa/pdf_q28_q30/q28_glitch_free_clock_gate.v](qa/pdf_q28_q30/q28_glitch_free_clock_gate.v), [notes/pdf_q28_q30_theory.md](notes/pdf_q28_q30_theory.md) |
 | 29 | Detect a rising edge of a signal when clocks are off | Code + Theory | [qa/pdf_q28_q30/q29_async_rise_detect_when_clocks_off.v](qa/pdf_q28_q30/q29_async_rise_detect_when_clocks_off.v), [notes/pdf_q28_q30_theory.md](notes/pdf_q28_q30_theory.md) |
 | 30 | Reset synchronizer with async assert and sync deassert | Code + Theory | [qa/pdf_q28_q30/q30_reset_synchronizer.v](qa/pdf_q28_q30/q30_reset_synchronizer.v), [notes/pdf_q28_q30_theory.md](notes/pdf_q28_q30_theory.md) |
+| 31 | Design asynchronous FIFO with Gray-coded pointers | Code | [qa/pdf_q31/q31_async_fifo_grayptr.v](qa/pdf_q31/q31_async_fifo_grayptr.v) |
+| 32 | Frequency division `/3` for 33.33%, 66.67%, and exact 50% duty cycle | Theory (cited note) | `frequency_division/f_div_3_all_duty_cycles.md` |
+| 33 | Frequency division `/5` for 20%, 40%, 60%, 80%, and exact 50% duty cycle | Theory (cited note) | `frequency_division/f_div_5_all_duty_cycles.md` |
+| 34 | Frequency division `/7` for 14.29%, 28.57%, 42.86%, 57.14%, 71.43%, 85.71%, and exact 50% duty cycle | Theory (cited note) | `frequency_division/f_div_7_all_duty_cycles.md` |

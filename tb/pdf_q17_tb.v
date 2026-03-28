@@ -4,8 +4,12 @@
 module pdf_q17_tb;
     reg clk;
     reg rst;
+    reg [3:0] bin_in;
+    reg [3:0] gray_in;
     wire [2:0] gray_case;
     wire [3:0] gray_xor;
+    wire [3:0] gray_from_bin;
+    wire [3:0] bin_from_gray;
 
     integer i;
     reg [2:0] expected_case;
@@ -41,11 +45,40 @@ module pdf_q17_tb;
         .gray(gray_xor)
     );
 
+    q17_bin_to_gray #(.N(4)) dut_bin_to_gray (
+        .bin(bin_in),
+        .gray(gray_from_bin)
+    );
+
+    q17_gray_to_bin #(.N(4)) dut_gray_to_bin (
+        .gray(gray_in),
+        .bin(bin_from_gray)
+    );
+
     always #5 clk = ~clk;
 
     initial begin
         clk = 1'b0;
         rst = 1'b1;
+        bin_in = 4'b0000;
+        gray_in = 4'b0000;
+
+        for (i = 0; i < 16; i = i + 1) begin
+            bin_in = i[3:0];
+            gray_in = i[3:0] ^ (i[3:0] >> 1);
+            #1;
+
+            if (gray_from_bin !== (i[3:0] ^ (i[3:0] >> 1))) begin
+                $display("FAIL Q17 bin->gray for bin=%0b got=%0b", i[3:0], gray_from_bin);
+                $finish;
+            end
+
+            if (bin_from_gray !== i[3:0]) begin
+                $display("FAIL Q17 gray->bin for gray=%0b got=%0b expected=%0b",
+                         gray_in, bin_from_gray, i[3:0]);
+                $finish;
+            end
+        end
 
         repeat (2) @(posedge clk);
         rst = 1'b0;
