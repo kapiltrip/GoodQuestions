@@ -7,6 +7,8 @@ module q25_clock_div2 (
         if (!rst_n)
             q <= 1'b0;
         else
+            // Toggle once on every rising edge, so one full output cycle
+            // takes two input clock cycles.
             q <= ~q;
     end
 endmodule

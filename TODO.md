@@ -46,9 +46,6 @@ This file now holds the actionable items that were previously mixed into `revisi
   - debounce means accept an input change only after it remains stable for a required time/window
   - glitch filtering is the practical effect of debounce: short pulses/bounce are rejected as invalid
   - in Q16, `q1/q2` synchronize the async input, while `q2/d1/d2` qualify it and create a one-cycle pulse
-- Pending deeper review:
-  - Q21: max and second max with least comparators
-  - Q24: 5-tap FIR filter, coefficients, signed arithmetic, and output width sizing
 - Review async FIFO pointer roles:
   - use binary pointers for pointer incrementing and RAM indexing
   - use Gray pointers only for clock-domain crossing and full/empty comparison
@@ -58,3 +55,9 @@ This file now holds the actionable items that were previously mixed into `revisi
   - `empty` is often checked with `rdptrgray_next` so the read domain can tell whether the FIFO becomes empty after the current allowed read
   - `full` is often checked with `wrptrgray_next` so the write domain can tell whether the FIFO becomes full after the current allowed write
   - if only current Gray pointers are compared, `full`/`empty` can lag by one cycle
+
+## Pending
+
+- Q27: divide-by-N circuit, programmable `divider_value = N-1`, odd/even duty behavior, and when decode-style outputs are not ideal as real clock nets
+- Q21: max and second max with least comparators
+- Q24: 5-tap FIR filter, coefficients, signed arithmetic, and output width sizing

@@ -2,9 +2,35 @@
 
 ## 25) Clock divide by 2
 
-- Use one flip-flop and toggle it on every positive clock edge.
-- Output frequency is half of input (`f_out = f_in / 2`).
-- Duty cycle is naturally 50% (ideal flip-flop behavior).
+- The simplest divide-by-2 circuit is a single flip-flop with feedback.
+- On every positive edge of `clk`, invert the previous output:
+  `q <= ~q;`
+- After reset, suppose `q = 0`.
+  Then the sequence at each rising edge is:
+  `0 -> 1 -> 0 -> 1 -> 0 ...`
+- Notice that `q` needs **two** input clock edges to complete one full output period:
+  `0 -> 1` is half-cycle, and `1 -> 0` completes the cycle.
+- Therefore:
+  `f_out = f_in / 2`
+- If the input clock has a 50% duty cycle and the flip-flop is ideal, the divided clock also has about 50% duty cycle.
+
+### Intuition
+
+- Input clock changes every cycle.
+- Output `q` changes only once per clock edge and must toggle twice to return to its starting value.
+- So output is slower by a factor of 2.
+
+### Why reset is used
+
+- Reset gives a known starting value to the divider.
+- Here, when `rst_n = 0`, output is forced to `0`.
+- After reset is released, toggling starts from a known state.
+
+### Verification idea
+
+- Keep applying input clock pulses.
+- Check that `q` changes state on every rising edge after reset.
+- If `q` toggles on every clock edge, its frequency is automatically half of the input.
 
 ## 26) Clock divide by 3 with 50-50 duty cycle
 

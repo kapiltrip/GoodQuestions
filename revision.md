@@ -6,6 +6,7 @@
 - [2) Shift operators and why `a << 2` is bit-level, not arithmetic `*`](#2-shift-operators-and-why-a--2-is-bit-level-not-arithmetic-)
 - [3) Four synthesizable styles for a 4:1, 1-bit mux](#3-four-synthesizable-styles-for-a-41-1-bit-mux)
 - [4) FSM Q&A: why `y` is `reg` but uses blocking assignment](#4-fsm-qa-why-y-is-reg-but-uses-blocking-assignment)
+- [5) Why `q <= ~q;` means `Qn+1 = ~Qn` in a clocked block](#5-why-q--q-means-qn1--qn-in-a-clocked-block)
 
 ## 1) Procedural vs sequential vs sequential logic
 
@@ -656,6 +657,76 @@ Short memory rule:
 Extra note:
 
 - In SystemVerilog, people often use `logic` instead of `reg`, which avoids some of this naming confusion.
+
+## 5) Why `q <= ~q;` means `Qn+1 = ~Qn` in a clocked block
+
+Consider:
+
+```verilog
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        q <= 1'b0;
+    else
+        q <= ~q;
+end
+```
+
+This is interpreted as a flip-flop because:
+
+- the block is triggered by `posedge clk`
+- `q` is assigned inside that clocked process
+- the assignment style `<=` matches register update behavior
+
+The important mapping is:
+
+- RHS `q` means the **current** stored value, `Qn`
+- LHS `q` means the **next** stored value after the active clock edge, `Qn+1`
+
+So:
+
+```verilog
+q <= ~q;
+```
+
+means:
+
+```text
+Qn+1 = ~Qn
+```
+
+That is toggle behavior.
+
+Truth table:
+
+```text
+Qn   Qn+1
+0    1
+1    0
+```
+
+So the circuit is:
+
+- a **D flip-flop**
+- with implicit `D = ~Q`
+- which therefore behaves like a T flip-flop with `T = 1`
+
+### Important correction
+
+It is **not** correct to say that LHS becomes `Qn+1` only because of non-blocking assignment.
+
+The full reason is the combination of:
+
+- a **clocked** `always @(posedge clk ...)` block, which implies storage
+- a **non-blocking** assignment, which models register update timing correctly
+
+So:
+
+- `posedge clk` tells you this is sequential storage
+- `<=` tells you the RHS is evaluated now and the register updates later in the time step
+
+Short memory line:
+
+> In a clocked `always` block, `q <= expr;` means the flip-flop will load `expr` on the clock edge, so `expr` is the D input and `q` on the left is the next state.
 
 [1]: https://www.eg.bucknell.edu/~csci320/2016-fall/wp-content/uploads/2015/08/verilog-std-1364-2005.pdf "Title"
 [2]: https://yosyshq.readthedocs.io/projects/yosys/en/v0.48/cell/word_mux.html "Multiplexers - YosysHQ Yosys 0.48 documentation"
