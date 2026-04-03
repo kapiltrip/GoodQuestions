@@ -20,10 +20,12 @@ module q19_divisible_by3_fsm (
 
     // New remainder = (old_remainder * 2 + bit_in) mod 3.
     always @* begin
+        // Default: stay in the current state unless a transition overrides it.
+        next_state = state;
         case (state)
-            MOD0: next_state = (bit_in ? MOD1 : MOD0);
+            MOD0: if (bit_in) next_state = MOD1;
             MOD1: next_state = (bit_in ? MOD0 : MOD2);
-            MOD2: next_state = (bit_in ? MOD2 : MOD1);
+            MOD2: if (!bit_in) next_state = MOD1;
             default: next_state = MOD0;
         endcase
     end

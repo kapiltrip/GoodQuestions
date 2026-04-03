@@ -633,6 +633,34 @@ end
 - `y` is being computed from the current state
 - so blocking assignment is the correct style
 
+Related note about `next_state = state;`:
+
+- that line is the standard FSM default: **stay in the current state unless some transition overrides it**
+- this is useful because many FSM branches intentionally mean "no transition"
+- so you do not need to write a separate assignment on every self-loop path
+
+Example:
+
+```verilog
+always @* begin
+    next_state = state;
+    case (state)
+        IDLE: if (start) next_state = RUN;
+        RUN:  if (done)  next_state = IDLE;
+    endcase
+end
+```
+
+Here:
+
+- if `start=0`, the FSM remains in `IDLE`
+- if `done=0`, the FSM remains in `RUN`
+
+So if someone feels that `next_state = state;` looks redundant, the right answer is:
+
+- it may be technically unnecessary when every path already assigns `next_state`
+- but it is still a very common safe default and a clean way to encode "hold state unless told otherwise"
+
 Why must `y` be `reg` here?
 
 - because in plain Verilog, anything assigned inside an `always` block must be declared `reg`

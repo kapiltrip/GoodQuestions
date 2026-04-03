@@ -64,6 +64,33 @@ the transitions become:
 
 This exactly matches the Verilog FSM in Q19.
 
+### Coding note: why `next_state = state;` is often used in an FSM
+
+Many FSM branches mean "stay in the same state."
+
+So a common Verilog style is:
+
+```verilog
+always @* begin
+    next_state = state;
+    case (state)
+        ...
+    endcase
+end
+```
+
+Meaning:
+
+- by default, hold the present state
+- only override `next_state` when an actual transition is needed
+
+For this divisible-by-3 FSM, that matches the self-loops:
+
+- `mod0` with input `0` stays in `mod0`
+- `mod2` with input `1` stays in `mod2`
+
+So the line can look redundant at first, but it is often there to express "no transition" cleanly and safely.
+
 ### Small example
 
 Suppose bits arrive as:

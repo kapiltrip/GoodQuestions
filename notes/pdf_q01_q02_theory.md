@@ -40,6 +40,44 @@ This is why people say:
   - `next_state` combinational block: use `=`
   - `state` register block: use `<=`
 
+### Related FSM point: why `next_state = state;` is often written first
+
+In many FSMs, some branches mean:
+
+- no transition
+- stay in the current state
+
+That is why people often begin the combinational next-state block with:
+
+```verilog
+always @(*) begin
+    next_state = state;
+    case (state)
+        IDLE: if (start) next_state = RUN;
+        RUN:  if (done)  next_state = IDLE;
+    endcase
+end
+```
+
+This means:
+
+- default behavior = hold the current state
+- only assign a different state when a transition condition is true
+
+So if `start=0` in `IDLE`, nothing overrides the default, and the FSM stays in `IDLE`.
+If `done=0` in `RUN`, it stays in `RUN`.
+
+This line is therefore usually **not redundant** in theory. It is a compact way to say:
+
+- if no transition fires, remain where you are
+- avoid missing assignments in some future edit
+- make self-loop behavior explicit without writing `next_state = state;` in every branch
+
+One subtle point:
+
+- if every valid state/path in your `case` already assigns `next_state`, then the line is not strictly required for correctness
+- but it is still a common safe default and makes later maintenance easier
+
 ### Good examples
 
 ```verilog

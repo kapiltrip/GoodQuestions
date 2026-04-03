@@ -14,10 +14,12 @@ always @(posedge clk or posedge rst)begin
         state<=next_state;
 end
 always @(*)begin
+    // Default: stay in the current state unless a transition overrides it.
+    next_state=state;
     case (state)
-        mod0:next_state=(x)?mod1:mod0;
+        mod0:if (x) next_state=mod1;
         mod1:next_state=(x)?mod0:mod2;
-        mod2:next_state=(x)?mod2:mod1;
+        mod2:if (!x) next_state=mod1;
         default : next_state=mod0;
 
 
