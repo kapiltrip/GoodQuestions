@@ -8,6 +8,7 @@
 - [4) FSM Q&A: why `y` is `reg` but uses blocking assignment](#4-fsm-qa-why-y-is-reg-but-uses-blocking-assignment)
 - [5) Why `q <= ~q;` means `Qn+1 = ~Qn` in a clocked block](#5-why-q--q-means-qn1--qn-in-a-clocked-block)
 - [6) FSM and async FIFO Q&A: why both `always @*` and clocked `always` blocks are used](#6-fsm-and-async-fifo-qa-why-both-always--and-clocked-always-blocks-are-used)
+- [6a) Section 6 quick links](#section-6-quick-links)
 
 ## 1) Procedural vs sequential vs sequential logic
 
@@ -1028,6 +1029,19 @@ Short rule:
 
 ## 6) FSM and async FIFO Q&A: why both `always @*` and clocked `always` blocks are used
 
+### Section 6 quick links
+
+- [FSM view](#sec6-fsm-view)
+- [Async FIFO view](#sec6-async-fifo-view)
+- [Why synchronizers use the current registered Gray pointer, not `*_next`](#sec6-sync-current-pointer)
+- [Why `full` compares local next write pointer against read pointer synchronized into write domain](#sec6-full-compare)
+- [Why `*_next` helps full/empty logic](#sec6-next-flags)
+- [Why binary `*_next` may need a default but Gray may not](#sec6-default-vs-gray)
+- [Why the Gray conversion line can stay outside the `if`](#sec6-gray-outside-if)
+- [When combinational dependency becomes a bad loop](#sec6-comb-loop)
+- [Safe fix with a registered flag](#sec6-safe-fix)
+
+<a id="sec6-q"></a>
 ### Q
 
 In an FSM or async FIFO, why do we often write:
@@ -1053,6 +1067,7 @@ So:
 
 This is the same idea in both FSMs and FIFOs.
 
+<a id="sec6-fsm-view"></a>
 ### FSM view
 
 In an FSM:
@@ -1087,6 +1102,7 @@ The clocked block answers:
 Without the combinational block, the FSM has storage but no transition logic.
 Without the clocked block, the FSM has logic but no memory.
 
+<a id="sec6-async-fifo-view"></a>
 ### Async FIFO view
 
 In the async FIFO, the exact same pattern is used for pointers:
@@ -1141,6 +1157,186 @@ So one clocked block cannot safely represent both sides. Each domain needs its o
 
 That is why async FIFOs naturally have multiple clocked `always` blocks.
 
+<a id="sec6-sync-current-pointer"></a>
+### Why synchronizers use the current registered Gray pointer, not `*_next`
+
+In a synchronizer such as:
+
+```verilog
+always @(posedge wrclk or posedge wrrst) begin
+    if (wrrst) begin
+        rdptrgray1 <= 0;
+        rdptrgray2 <= 0;
+    end else begin
+        rdptrgray1 <= rdptrgray;
+        rdptrgray2 <= rdptrgray1;
+    end
+end
+```
+
+the signal being crossed is `rdptrgray`, not `rdptrgray_next`.
+
+That is intentional.
+
+Reason:
+
+- `rdptrgray` is a registered signal in the read clock domain
+- `rdptrgray_next` is only a local combinational prediction
+
+For clock-domain crossing, the synchronizer should sample a source-domain signal that is already coming from a flip-flop.
+That is the stable and standard CDC pattern.
+
+Why `rdptrgray_next` is not used in the synchronizer:
+
+- it is combinational, not registered
+- it can change immediately when read-side inputs change
+- crossing a combinational prediction into another clock domain is bad CDC style
+
+So the FIFO uses two different ideas at the same time:
+
+- synchronize the remote side's current registered Gray pointer across the domain
+- compute the local side's next pointer locally
+
+That is why the write side typically does:
+
+- synchronize `rdptrgray` into the write domain, producing `rdptrgray2`
+- compute local `wrptrgray_next`
+- compare `wrptrgray_next` against synchronized `rdptrgray2`
+
+This lets the write side ask:
+
+> if I perform my next write, will I hit the synchronized read pointer and become full?
+
+Short memory line:
+
+> `*_next` is for local prediction; the synchronizer carries the current registered pointer across domains.
+
+<a id="sec6-full-compare"></a>
+### Why `full` compares local next write pointer against read pointer synchronized into write domain
+
+A common async-FIFO full check is:
+
+```verilog
+assign full = (wrptrgray_next ==
+               {~rdptrgray2[aw:aw-1], rdptrgray2[aw-2:0]});
+```
+
+This can look confusing at first, because it compares:
+
+- local write-side next pointer: `wrptrgray_next`
+- read pointer synchronized into the write domain: `rdptrgray2`
+
+The key point is:
+
+- `full` is a write-domain flag
+- so it must be decided inside the write domain
+
+That means the write side needs:
+
+- its own local pointer directly
+- the read pointer brought safely into the write domain through synchronization
+
+So yes, the write side does need the write pointer in the write domain.
+It already has that as `wrptrgray_next`.
+What it does not have locally is the read pointer, so that is what must be synchronized in.
+
+### Why `full` cannot be decided from only the write pointer
+
+FIFO status is always about the relationship between the two pointers:
+
+- `empty` depends on where read is relative to write
+- `full` depends on where write is relative to read
+
+So `full` cannot be computed from only the write pointer.
+It must also know where the read side currently is.
+
+That is why the write domain compares its local next write pointer against the synchronized read pointer.
+
+### Why use `wrptrgray_next`, not current `wrptrgray`
+
+The write side wants to answer:
+
+> if I accept the write being requested now, will the FIFO become full after that write?
+
+That is a post-write question.
+So it uses the next write pointer:
+
+- `wrptrgray` = current write position
+- `wrptrgray_next` = write position after the possible write of this cycle
+
+This is directly parallel to the read-domain empty check:
+
+- `empty` uses local `rdptrgray_next`
+- `full` uses local `wrptrgray_next`
+
+### Why compare against the read pointer synchronized into the write domain
+
+The original read pointer lives in the read clock domain.
+Using raw `rdptrgray` inside write-domain logic would be unsafe CDC practice.
+
+So the write side first creates:
+
+```verilog
+rdptrgray -> rdptrgray1 -> rdptrgray2
+```
+
+Now `rdptrgray2` is the read pointer as safely seen by the write domain.
+
+So the full check is really:
+
+> after my possible next write, will my write pointer reach the read pointer position that I safely know about in my own clock domain?
+
+### Why the top two bits are inverted
+
+An async FIFO pointer usually has one extra bit beyond the RAM address bits.
+That extra bit helps distinguish:
+
+- pointers equal because FIFO is empty
+- pointers with same low address bits but one full wrap apart because FIFO is full
+
+In binary terms:
+
+- `empty` means read pointer equals write pointer
+- `full` means write pointer is exactly one FIFO-depth ahead of read pointer
+
+When the write pointer is one full buffer ahead:
+
+- the low address bits match
+- the wrap relationship differs
+
+After Gray conversion, that full condition becomes:
+
+- top two Gray bits inverted
+- remaining Gray bits equal
+
+That is why the Gray full pattern is:
+
+```verilog
+{~rdptrgray2[aw:aw-1], rdptrgray2[aw-2:0]}
+```
+
+### Small intuition example
+
+Suppose the synchronized read pointer in binary is one value, and full would happen when the write pointer becomes exactly one whole FIFO lap ahead of it.
+
+The low address bits still match, but the wrap tracking bits differ.
+In Gray form, that binary one-lap-ahead relationship maps to:
+
+- invert the top two bits
+- keep the rest unchanged
+
+So the write-side full test is not random bit manipulation.
+It is the Gray-code form of:
+
+> next write pointer is exactly one buffer ahead of the read pointer
+
+### Short memory line
+
+For `full`:
+
+> compare the local next write pointer against the read pointer synchronized into the write domain, using the Gray full-pattern transform.
+
+<a id="sec6-next-flags"></a>
 ### Why `*_next` is especially useful in FIFO full/empty logic
 
 In many FIFOs:
@@ -1155,6 +1351,7 @@ This means the logic asks:
 
 Using the next pointer avoids a one-cycle-late flag.
 
+<a id="sec6-default-vs-gray"></a>
 ### Why binary `*_next` often needs a default assignment but Gray `*_next` may not
 
 This is not because Gray code follows a different rule.
@@ -1210,6 +1407,79 @@ Short memory line:
 
 > default assignment is about complete combinational coverage, not about binary vs Gray.
 
+<a id="sec6-gray-outside-if"></a>
+### Why the Gray conversion line can stay outside the `if`
+
+This is a separate point from default assignment.
+
+Consider:
+
+```verilog
+always @(*) begin
+    rdptr_bin_next = rdptr_bin;
+    if (ren && !empty)
+        rdptr_bin_next = rdptr_bin + 1'b1;
+    rdptr_gray_next = binary2gray(rdptr_bin_next);
+end
+```
+
+This is correct.
+
+The reason is:
+
+- first the logic decides what `rdptr_bin_next` should be
+- then it always converts that chosen binary value into Gray
+
+So:
+
+- if read is allowed, `rdptr_bin_next` becomes incremented
+- if read is not allowed, `rdptr_bin_next` stays equal to `rdptr_bin`
+- in both cases, `rdptr_gray_next` should simply be the Gray encoding of the final `rdptr_bin_next`
+
+That is why making the Gray conversion unconditional is often the cleanest style.
+
+### Important syntax note about `if` without `begin ... end`
+
+If you write:
+
+```verilog
+if (ren && !empty)
+    rdptr_bin_next = rdptr_bin + 1'b1;
+    rdptr_gray_next = binary2gray(rdptr_bin_next);
+```
+
+then only the first statement is controlled by the `if`.
+The Gray-conversion line is outside the `if` and is unconditional.
+
+That surprises many people, but in this specific FIFO pattern it is actually okay and often desirable.
+
+If you intended both statements to be conditional, you must write:
+
+```verilog
+if (ren && !empty) begin
+    rdptr_bin_next  = rdptr_bin + 1'b1;
+    rdptr_gray_next = binary2gray(rdptr_bin_next);
+end
+```
+
+But if you do that, you must also handle the false path with a default assignment or `else`, otherwise `rdptr_gray_next` may be left unassigned.
+
+So the clean pattern is usually:
+
+```verilog
+always @(*) begin
+    rdptr_bin_next = rdptr_bin;
+    if (ren && !empty)
+        rdptr_bin_next = rdptr_bin + 1'b1;
+    rdptr_gray_next = binary2gray(rdptr_bin_next);
+end
+```
+
+Short memory line:
+
+> choose the next binary pointer first, then always derive Gray from that chosen next pointer.
+
+<a id="sec6-comb-loop"></a>
 ### When does the combinational dependency become a real problem?
 
 The problem is not:
@@ -1293,6 +1563,7 @@ But if `full = 1`, then:
 
 So the logic can keep flipping while trying to solve itself.
 
+<a id="sec6-safe-fix"></a>
 ### Safe fix: use the current registered flag to gate the operation
 
 The clean fix is to break the loop with a register.
