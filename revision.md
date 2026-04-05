@@ -7,6 +7,7 @@
 - [3) Four synthesizable styles for a 4:1, 1-bit mux](#3-four-synthesizable-styles-for-a-41-1-bit-mux)
 - [4) FSM Q&A: why `y` is `reg` but uses blocking assignment](#4-fsm-qa-why-y-is-reg-but-uses-blocking-assignment)
 - [5) Why `q <= ~q;` means `Qn+1 = ~Qn` in a clocked block](#5-why-q--q-means-qn1--qn-in-a-clocked-block)
+- [6) FSM and async FIFO Q&A: why both `always @*` and clocked `always` blocks are used](#6-fsm-and-async-fifo-qa-why-both-always--and-clocked-always-blocks-are-used)
 
 ## 1) Procedural vs sequential vs sequential logic
 
@@ -1024,3 +1025,345 @@ So `999` is:
 Short rule:
 
 > counter value = pulses completed so far, except that the starting reset state is `0` before any pulse
+
+## 6) FSM and async FIFO Q&A: why both `always @*` and clocked `always` blocks are used
+
+### Q
+
+In an FSM or async FIFO, why do we often write:
+
+```verilog
+always @*            // next-value logic
+always @(posedge clk) // register update
+```
+
+Why are both needed? Why not do everything in only one block?
+
+### A
+
+Because they model two different hardware jobs:
+
+- `always @*` computes the next value using the current registers and inputs
+- `always @(posedge clk ...)` stores that next value into flip-flops on the active clock edge
+
+So:
+
+- combinational block = decision/calculation
+- clocked block = memory/storage
+
+This is the same idea in both FSMs and FIFOs.
+
+### FSM view
+
+In an FSM:
+
+```verilog
+always @* begin
+    next_state = state;
+    ...
+end
+
+always @(posedge clk or posedge rst) begin
+    if (rst)
+        state <= MOD0;
+    else
+        state <= next_state;
+end
+```
+
+Here:
+
+- `state` is the current stored state
+- `next_state` is the combinationally computed next state
+
+The `always @*` block answers:
+
+> Based on the current state and inputs, where should the FSM go next?
+
+The clocked block answers:
+
+> On the next clock edge, which state should be remembered?
+
+Without the combinational block, the FSM has storage but no transition logic.
+Without the clocked block, the FSM has logic but no memory.
+
+### Async FIFO view
+
+In the async FIFO, the exact same pattern is used for pointers:
+
+```verilog
+always @(*) begin
+    wrptrbin_next = wrptrbin;
+    if (wren && !full)
+        wrptrbin_next = wrptrbin + 1'b1;
+end
+
+always @(*) begin
+    wrptrgray_next = binary2gray(wrptrbin_next);
+end
+
+always @(posedge wrclk or posedge wrrst) begin
+    if (wrrst) begin
+        wrptrbin  <= 0;
+        wrptrgray <= 0;
+    end else begin
+        wrptrbin  <= wrptrbin_next;
+        wrptrgray <= wrptrgray_next;
+    end
+end
+```
+
+Here:
+
+- `wrptrbin` is the current stored write pointer
+- `wrptrbin_next` is the next write pointer
+- `wrptrgray_next` is the Gray-coded version of that next pointer
+
+So the write side is doing:
+
+1. calculate the next pointer now
+2. store it on `wrclk`
+
+The read side does the same thing on `rdclk`.
+
+### Why async FIFO has separate write-clock and read-clock blocks
+
+An async FIFO has two clock domains:
+
+- write domain uses `wrclk`
+- read domain uses `rdclk`
+
+So one clocked block cannot safely represent both sides. Each domain needs its own registers:
+
+- write pointer registers update on `wrclk`
+- read pointer registers update on `rdclk`
+- synchronized Gray pointers cross between the domains through separate synchronizer registers
+
+That is why async FIFOs naturally have multiple clocked `always` blocks.
+
+### Why `*_next` is especially useful in FIFO full/empty logic
+
+In many FIFOs:
+
+- `full` compares against `wrptrgray_next`
+- `empty` compares against `rdptrgray_next`
+
+This means the logic asks:
+
+- if this write happens, will the FIFO become full?
+- if this read happens, will the FIFO become empty?
+
+Using the next pointer avoids a one-cycle-late flag.
+
+### Why binary `*_next` often needs a default assignment but Gray `*_next` may not
+
+This is not because Gray code follows a different rule.
+It is because the assignment coverage is different.
+
+Example:
+
+```verilog
+always @(*) begin
+    wrptrbin_next = wrptrbin;
+    if (wren && !full)
+        wrptrbin_next = wrptrbin + 1'b1;
+end
+```
+
+Here the assignment is conditional:
+
+- if `wren && !full` is true, increment
+- otherwise, hold the current pointer
+
+So a default assignment is needed first:
+
+```verilog
+wrptrbin_next = wrptrbin;
+```
+
+Without that line, the false path would leave `wrptrbin_next` unassigned, which can infer a latch in combinational logic.
+
+Now compare that to the Gray conversion block:
+
+```verilog
+always @(*) begin
+    rdptrgray_next = binary2gray(rdptrbin_next);
+    wrptrgray_next = binary2gray(wrptrbin_next);
+end
+```
+
+Here both outputs are assigned on every execution of the block.
+There is no `if` with a missing branch.
+So no default assignment is required.
+
+The important idea is:
+
+- binary-next block chooses between multiple possibilities: hold or increment
+- Gray-next block has only one valid answer once the binary-next value is known
+
+So:
+
+- default assignment is needed when some paths do not assign the signal
+- default assignment is not needed when every path already assigns the signal
+
+Short memory line:
+
+> default assignment is about complete combinational coverage, not about binary vs Gray.
+
+### When does the combinational dependency become a real problem?
+
+The problem is not:
+
+- using two `always @(*)` blocks
+- using `assign` instead of `always @(*)`
+
+Both are just ways to describe combinational logic.
+
+A normal combinational chain is fine:
+
+```verilog
+a = f(b);
+c = g(a);
+```
+
+This is one-way dependency:
+
+- `a` depends on `b`
+- `c` depends on `a`
+
+That settles normally.
+
+The bad case is a circular dependency:
+
+```verilog
+a = f(c);
+c = g(a);
+```
+
+Now each signal depends on the other.
+That is a combinational loop.
+
+### Async FIFO example of the bad loop
+
+Suppose someone writes:
+
+```verilog
+assign wrptrbin_next  = (wren && !full) ? (wrptrbin + 1'b1) : wrptrbin;
+assign wrptrgray_next = binary2gray(wrptrbin_next);
+assign full           = (wrptrgray_next == some_synced_read_value);
+```
+
+Now look at the dependency chain:
+
+- `wrptrbin_next` depends on `full`
+- `wrptrgray_next` depends on `wrptrbin_next`
+- `full` depends on `wrptrgray_next`
+
+So:
+
+```text
+wrptrbin_next -> wrptrgray_next -> full -> wrptrbin_next
+```
+
+That is the loop.
+
+People sometimes casually call this a "deadlock," but the more accurate hardware term is:
+
+- combinational loop
+- non-converging combinational logic
+- possible oscillation or `X` propagation in simulation
+
+The issue is that the simulator or hardware is trying to find a stable answer for signals that keep feeding back into each other without a register breaking the loop.
+
+### Why this can fail to settle
+
+Imagine:
+
+- first assume `full = 0`
+- then write is allowed, so `wrptrbin_next = wrptrbin + 1`
+- then `wrptrgray_next` changes
+- then the comparison may make `full = 1`
+
+But if `full = 1`, then:
+
+- write is no longer allowed
+- so `wrptrbin_next = wrptrbin`
+- then `wrptrgray_next` changes again
+- then `full` may become `0`
+
+So the logic can keep flipping while trying to solve itself.
+
+### Safe fix: use the current registered flag to gate the operation
+
+The clean fix is to break the loop with a register.
+
+Use:
+
+- current registered `full` or `empty` to decide whether the operation is allowed now
+- combinational `*_next` logic to compute the candidate next pointer
+- a separate next-flag calculation
+- a clocked block to register the new flag
+
+Example write-side pattern:
+
+```verilog
+always @(*) begin
+    wrptrbin_next = wrptrbin;
+    if (wren && !full_reg)
+        wrptrbin_next = wrptrbin + 1'b1;
+
+    wrptrgray_next = binary2gray(wrptrbin_next);
+    full_next = (wrptrgray_next == {~rdptrgray2[aw:aw-1], rdptrgray2[aw-2:0]});
+end
+
+always @(posedge wrclk or posedge wrrst) begin
+    if (wrrst) begin
+        wrptrbin  <= 0;
+        wrptrgray <= 0;
+        full_reg  <= 1'b0;
+    end else begin
+        wrptrbin  <= wrptrbin_next;
+        wrptrgray <= wrptrgray_next;
+        full_reg  <= full_next;
+    end
+end
+```
+
+Now the dependency is safe:
+
+- current `full_reg` decides whether the pointer may advance
+- `full_next` predicts the flag for the next cycle
+- the clock edge breaks the feedback path
+
+This is the key idea:
+
+> combinational next-value logic is fine, but a feedback path must be broken by a register.
+
+### Important mental model
+
+Do not read different `always` blocks like software lines executing top to bottom.
+
+In Verilog:
+
+- statements inside one `begin ... end` execute in procedural order
+- different `always` blocks describe concurrent hardware
+
+So the FIFO is not "doing things in reverse."
+It is simply describing:
+
+- combinational hardware that computes next values
+- sequential hardware that stores those values
+
+### Short takeaway
+
+Use this memory line:
+
+> `always @*` decides, `always @(posedge clk)` remembers.
+
+For FSMs:
+
+- current state -> compute `next_state` -> store on clock
+
+For FIFOs:
+
+- current pointer -> compute `*_next` -> store on the corresponding clock
