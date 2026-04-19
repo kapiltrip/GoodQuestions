@@ -11,6 +11,10 @@ module q19_divisible_by3_fsm (
     localparam MOD1 = 2'd1;
     localparam MOD2 = 2'd2;
 
+    // State register:
+    // stores the current remainder state of the number received so far.
+    // On reset, the remainder is 0, so the FSM starts in MOD0.
+    // On each clock, move to the next remainder state calculated below.
     always @(posedge clk or posedge rst) begin
         if (rst)
             state <= MOD0;
@@ -23,9 +27,9 @@ module q19_divisible_by3_fsm (
         // Default: stay in the current state unless a transition overrides it.
         next_state = state;
         case (state)
-            MOD0: if (bit_in) next_state = MOD1;
+            MOD0: next_state = bit_in ? MOD1 : MOD0;
             MOD1: next_state = (bit_in ? MOD0 : MOD2);
-            MOD2: if (!bit_in) next_state = MOD1;
+            MOD2: next_state = bit_in ? MOD2 : MOD1;
             default: next_state = MOD0;
         endcase
     end

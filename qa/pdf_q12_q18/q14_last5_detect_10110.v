@@ -18,6 +18,26 @@ module q14_last5_detect_10110 (
 endmodule
 
 
+module q14_last5_detect_10110_msb_insert (
+    input  wire clk,
+    input  wire rst,
+    input  wire din,
+    output wire match
+);
+    reg [4:0] window;
+
+    always @(posedge clk or posedge rst) begin
+        if (rst)
+            window <= 5'b00000;
+        else
+            window <= {din, window[4:1]};
+    end
+
+    // With MSB insertion, input 10110 is stored as 01101.
+    assign match = (window == 5'b01101);
+endmodule
+
+
 `timescale 1ns/1ps
 
 module tb_q14_last5_detect_10110;

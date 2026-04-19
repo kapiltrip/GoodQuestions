@@ -32,6 +32,16 @@ module q13_a (
     localparam S101  = 3'd3;
     localparam S1011 = 3'd4;
 
+    // FSM state register / present-state logic:
+    // - state is the present state: what pattern prefix has been matched now.
+    // - next_state is calculated separately by the combinational logic below.
+    // - this clocked block gives the FSM memory by copying next_state into
+    //   state only on a clock edge.
+    // - reset forces the FSM to S0, meaning no useful bits are matched yet.
+    //
+    // This block is not the next-state logic. It is the sequential state
+    // update block. Without it, the FSM would not remember whether it had
+    // matched nothing, "1", "10", "101", or "1011".
     always @(posedge clk or posedge rst) begin
         if (rst)
             state <= S0;
@@ -86,6 +96,10 @@ module q13_b (
     localparam S101  = 3'd3;
     localparam S1011 = 3'd4;
 
+    // FSM state register / present-state logic:
+    // the combinational block below calculates next_state from the current
+    // state and input x; this clocked block stores that calculated value into
+    // state on the next posedge clk. Reset starts the search from S0.
     always @(posedge clk or posedge rst) begin
         if (rst)
             state <= S0;
@@ -137,6 +151,10 @@ module q13_c (
     localparam S1011  = 3'd4;
     localparam SMATCH = 3'd5;
 
+    // FSM state register / present-state logic:
+    // state is the stored current state. next_state is only the computed future
+    // state. On each clock edge, the FSM advances by doing state <= next_state.
+    // Reset returns the Moore FSM to S0.
     always @(posedge clk or posedge rst) begin
         if (rst)
             state <= S0;
@@ -191,6 +209,10 @@ module q13_d (
     localparam S1011  = 3'd4;
     localparam SMATCH = 3'd5;
 
+    // FSM state register / present-state logic:
+    // this is the memory part of the FSM. The next-state logic chooses where
+    // to go next, but the actual state changes only here, on posedge clk.
+    // Reset puts the machine back into the starting state S0.
     always @(posedge clk or posedge rst) begin
         if (rst)
             state <= S0;
