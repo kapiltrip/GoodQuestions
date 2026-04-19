@@ -1,0 +1,203 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1539-g2693dd32b)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 12;
+:vpi_module "C:\iverilog\lib\ivl\system.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "C:\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\va_math.vpi";
+:vpi_module "C:\iverilog\lib\ivl\v2009.vpi";
+S_000002aa99ad9600 .scope package, "$unit" "$unit" 2 1;
+ .timescale 0 0;
+S_000002aa99ad9790 .scope module, "pdf_q03_tb" "pdf_q03_tb" 3 4;
+ .timescale -9 -12;
+v000002aa99acd6b0_0 .var "a", 0 0;
+v000002aa99acd390_0 .net "and_y", 0 0, L_000002aa99acea70;  1 drivers
+v000002aa99ace150_0 .var "b", 0 0;
+v000002aa99acd430_0 .var/i "i", 31 0;
+v000002aa99acde30_0 .net "nand_y", 0 0, L_000002aa99acf560;  1 drivers
+v000002aa99acdd90_0 .net "nor_y", 0 0, L_000002aa99acf720;  1 drivers
+v000002aa99acdb10_0 .net "or_y", 0 0, L_000002aa99acf330;  1 drivers
+v000002aa99b35de0_0 .net "xnor_y", 0 0, L_000002aa99acec30;  1 drivers
+v000002aa99b34d00_0 .net "xor_y", 0 0, L_000002aa99acefb0;  1 drivers
+S_000002aa99ade900 .scope module, "dut" "q03" 3 9, 4 1 0, S_000002aa99ad9790;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 1 "a";
+    .port_info 1 /INPUT 1 "b";
+    .port_info 2 /OUTPUT 1 "and_y";
+    .port_info 3 /OUTPUT 1 "or_y";
+    .port_info 4 /OUTPUT 1 "xor_y";
+    .port_info 5 /OUTPUT 1 "nand_y";
+    .port_info 6 /OUTPUT 1 "nor_y";
+    .port_info 7 /OUTPUT 1 "xnor_y";
+L_000002aa99acea70 .functor AND 1, v000002aa99acd6b0_0, v000002aa99ace150_0, C4<1>, C4<1>;
+L_000002aa99acf330 .functor OR 1, v000002aa99acd6b0_0, v000002aa99ace150_0, C4<0>, C4<0>;
+L_000002aa99acefb0 .functor XOR 1, v000002aa99acd6b0_0, v000002aa99ace150_0, C4<0>, C4<0>;
+L_000002aa99aceae0 .functor AND 1, v000002aa99acd6b0_0, v000002aa99ace150_0, C4<1>, C4<1>;
+L_000002aa99acf560 .functor NOT 1, L_000002aa99aceae0, C4<0>, C4<0>, C4<0>;
+L_000002aa99aceca0 .functor OR 1, v000002aa99acd6b0_0, v000002aa99ace150_0, C4<0>, C4<0>;
+L_000002aa99acf720 .functor NOT 1, L_000002aa99aceca0, C4<0>, C4<0>, C4<0>;
+L_000002aa99acf5d0 .functor XOR 1, v000002aa99acd6b0_0, v000002aa99ace150_0, C4<0>, C4<0>;
+L_000002aa99acec30 .functor NOT 1, L_000002aa99acf5d0, C4<0>, C4<0>, C4<0>;
+v000002aa99acded0_0 .net *"_ivl_10", 0 0, L_000002aa99aceca0;  1 drivers
+v000002aa99acd750_0 .net *"_ivl_14", 0 0, L_000002aa99acf5d0;  1 drivers
+v000002aa99acd570_0 .net *"_ivl_6", 0 0, L_000002aa99aceae0;  1 drivers
+v000002aa99acd9d0_0 .net "a", 0 0, v000002aa99acd6b0_0;  1 drivers
+v000002aa99acd890_0 .net "and_y", 0 0, L_000002aa99acea70;  alias, 1 drivers
+v000002aa99ace010_0 .net "b", 0 0, v000002aa99ace150_0;  1 drivers
+v000002aa99acd930_0 .net "nand_y", 0 0, L_000002aa99acf560;  alias, 1 drivers
+v000002aa99acd610_0 .net "nor_y", 0 0, L_000002aa99acf720;  alias, 1 drivers
+v000002aa99acd250_0 .net "or_y", 0 0, L_000002aa99acf330;  alias, 1 drivers
+v000002aa99acdcf0_0 .net "xnor_y", 0 0, L_000002aa99acec30;  alias, 1 drivers
+v000002aa99acda70_0 .net "xor_y", 0 0, L_000002aa99acefb0;  alias, 1 drivers
+S_000002aa99a4ce20 .scope module, "q03_bitwise_vector" "q03_bitwise_vector" 4 19;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 4 "a";
+    .port_info 1 /INPUT 4 "b";
+    .port_info 2 /OUTPUT 4 "and_y";
+    .port_info 3 /OUTPUT 4 "or_y";
+    .port_info 4 /OUTPUT 4 "xor_y";
+    .port_info 5 /OUTPUT 4 "nand_y";
+    .port_info 6 /OUTPUT 4 "nor_y";
+    .port_info 7 /OUTPUT 4 "xnor_y";
+P_000002aa99acab40 .param/l "WIDTH" 0 4 20, +C4<00000000000000000000000000000100>;
+o000002aa99ae63a8 .functor BUFZ 4, C4<zzzz>; HiZ drive
+o000002aa99ae6408 .functor BUFZ 4, C4<zzzz>; HiZ drive
+L_000002aa99acf640 .functor AND 4, o000002aa99ae63a8, o000002aa99ae6408, C4<1111>, C4<1111>;
+L_000002aa99acee60 .functor OR 4, o000002aa99ae63a8, o000002aa99ae6408, C4<0000>, C4<0000>;
+L_000002aa99acf020 .functor XOR 4, o000002aa99ae63a8, o000002aa99ae6408, C4<0000>, C4<0000>;
+L_000002aa99acf6b0 .functor AND 4, o000002aa99ae63a8, o000002aa99ae6408, C4<1111>, C4<1111>;
+L_000002aa99acf790 .functor NOT 4, L_000002aa99acf6b0, C4<0000>, C4<0000>, C4<0000>;
+L_000002aa99acf170 .functor OR 4, o000002aa99ae63a8, o000002aa99ae6408, C4<0000>, C4<0000>;
+L_000002aa99acf800 .functor NOT 4, L_000002aa99acf170, C4<0000>, C4<0000>, C4<0000>;
+L_000002aa99acf1e0 .functor XOR 4, o000002aa99ae63a8, o000002aa99ae6408, C4<0000>, C4<0000>;
+L_000002aa99acf090 .functor NOT 4, L_000002aa99acf1e0, C4<0000>, C4<0000>, C4<0000>;
+v000002aa99b34940_0 .net *"_ivl_10", 3 0, L_000002aa99acf170;  1 drivers
+v000002aa99b34da0_0 .net *"_ivl_14", 3 0, L_000002aa99acf1e0;  1 drivers
+v000002aa99b355c0_0 .net *"_ivl_6", 3 0, L_000002aa99acf6b0;  1 drivers
+v000002aa99b34e40_0 .net "a", 3 0, o000002aa99ae63a8;  0 drivers
+v000002aa99b350c0_0 .net "and_y", 3 0, L_000002aa99acf640;  1 drivers
+v000002aa99b34440_0 .net "b", 3 0, o000002aa99ae6408;  0 drivers
+v000002aa99b35200_0 .net "nand_y", 3 0, L_000002aa99acf790;  1 drivers
+v000002aa99b353e0_0 .net "nor_y", 3 0, L_000002aa99acf800;  1 drivers
+v000002aa99b35480_0 .net "or_y", 3 0, L_000002aa99acee60;  1 drivers
+v000002aa99b357a0_0 .net "xnor_y", 3 0, L_000002aa99acf090;  1 drivers
+v000002aa99b34120_0 .net "xor_y", 3 0, L_000002aa99acf020;  1 drivers
+S_000002aa99a4cfb0 .scope module, "q03_logical" "q03_logical" 4 39;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 1 "a";
+    .port_info 1 /INPUT 1 "b";
+    .port_info 2 /OUTPUT 1 "and_y";
+    .port_info 3 /OUTPUT 1 "or_y";
+    .port_info 4 /OUTPUT 1 "xor_y";
+    .port_info 5 /OUTPUT 1 "nand_y";
+    .port_info 6 /OUTPUT 1 "nor_y";
+    .port_info 7 /OUTPUT 1 "xnor_y";
+o000002aa99ae6708 .functor BUFZ 1, C4<z>; HiZ drive
+o000002aa99ae6768 .functor BUFZ 1, C4<z>; HiZ drive
+L_000002aa99aced10 .functor AND 1, o000002aa99ae6708, o000002aa99ae6768, C4<1>, C4<1>;
+L_000002aa99acf950 .functor OR 1, o000002aa99ae6708, o000002aa99ae6768, C4<0>, C4<0>;
+L_000002aa99acf100 .functor XOR 1, o000002aa99ae6708, o000002aa99ae6768, C4<0>, C4<0>;
+L_000002aa99aceb50 .functor AND 1, o000002aa99ae6708, o000002aa99ae6768, C4<1>, C4<1>;
+L_000002aa99acedf0 .functor OR 1, o000002aa99ae6708, o000002aa99ae6768, C4<0>, C4<0>;
+L_000002aa99acf3a0 .functor XNOR 1, o000002aa99ae6708, o000002aa99ae6768, C4<0>, C4<0>;
+v000002aa99b35840_0 .net *"_ivl_11", 0 0, L_000002aa99acedf0;  1 drivers
+v000002aa99b352a0_0 .net *"_ivl_7", 0 0, L_000002aa99aceb50;  1 drivers
+v000002aa99b344e0_0 .net "a", 0 0, o000002aa99ae6708;  0 drivers
+v000002aa99b35340_0 .net "and_y", 0 0, L_000002aa99aced10;  1 drivers
+v000002aa99b35520_0 .net "b", 0 0, o000002aa99ae6768;  0 drivers
+v000002aa99b35d40_0 .net "nand_y", 0 0, L_000002aa99b343a0;  1 drivers
+v000002aa99b35660_0 .net "nor_y", 0 0, L_000002aa99b349e0;  1 drivers
+v000002aa99b34ee0_0 .net "or_y", 0 0, L_000002aa99acf950;  1 drivers
+v000002aa99b35700_0 .net "xnor_y", 0 0, L_000002aa99acf3a0;  1 drivers
+v000002aa99b34580_0 .net "xor_y", 0 0, L_000002aa99acf100;  1 drivers
+L_000002aa99b343a0 .reduce/nor L_000002aa99aceb50;
+L_000002aa99b349e0 .reduce/nor L_000002aa99acedf0;
+    .scope S_000002aa99ad9790;
+T_0 ;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v000002aa99acd430_0, 0, 32;
+T_0.0 ;
+    %load/vec4 v000002aa99acd430_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_0.1, 5;
+    %load/vec4 v000002aa99acd430_0;
+    %parti/s 2, 0, 2;
+    %split/vec4 1;
+    %store/vec4 v000002aa99ace150_0, 0, 1;
+    %store/vec4 v000002aa99acd6b0_0, 0, 1;
+    %delay 1000, 0;
+    %load/vec4 v000002aa99acd390_0;
+    %load/vec4 v000002aa99acd6b0_0;
+    %load/vec4 v000002aa99ace150_0;
+    %and;
+    %cmp/ne;
+    %jmp/0xz  T_0.2, 6;
+    %vpi_call/w 3 19 "$display", "FAIL Q03 and" {0 0 0};
+    %vpi_call/w 3 19 "$finish" {0 0 0};
+T_0.2 ;
+    %load/vec4 v000002aa99acdb10_0;
+    %load/vec4 v000002aa99acd6b0_0;
+    %load/vec4 v000002aa99ace150_0;
+    %or;
+    %cmp/ne;
+    %jmp/0xz  T_0.4, 6;
+    %vpi_call/w 3 20 "$display", "FAIL Q03 or" {0 0 0};
+    %vpi_call/w 3 20 "$finish" {0 0 0};
+T_0.4 ;
+    %load/vec4 v000002aa99b34d00_0;
+    %load/vec4 v000002aa99acd6b0_0;
+    %load/vec4 v000002aa99ace150_0;
+    %xor;
+    %cmp/ne;
+    %jmp/0xz  T_0.6, 6;
+    %vpi_call/w 3 21 "$display", "FAIL Q03 xor" {0 0 0};
+    %vpi_call/w 3 21 "$finish" {0 0 0};
+T_0.6 ;
+    %load/vec4 v000002aa99acde30_0;
+    %load/vec4 v000002aa99acd6b0_0;
+    %load/vec4 v000002aa99ace150_0;
+    %and;
+    %inv;
+    %cmp/ne;
+    %jmp/0xz  T_0.8, 6;
+    %vpi_call/w 3 22 "$display", "FAIL Q03 nand" {0 0 0};
+    %vpi_call/w 3 22 "$finish" {0 0 0};
+T_0.8 ;
+    %load/vec4 v000002aa99acdd90_0;
+    %load/vec4 v000002aa99acd6b0_0;
+    %load/vec4 v000002aa99ace150_0;
+    %or;
+    %inv;
+    %cmp/ne;
+    %jmp/0xz  T_0.10, 6;
+    %vpi_call/w 3 23 "$display", "FAIL Q03 nor" {0 0 0};
+    %vpi_call/w 3 23 "$finish" {0 0 0};
+T_0.10 ;
+    %load/vec4 v000002aa99b35de0_0;
+    %load/vec4 v000002aa99acd6b0_0;
+    %load/vec4 v000002aa99ace150_0;
+    %xor;
+    %inv;
+    %cmp/ne;
+    %jmp/0xz  T_0.12, 6;
+    %vpi_call/w 3 24 "$display", "FAIL Q03 xnor" {0 0 0};
+    %vpi_call/w 3 24 "$finish" {0 0 0};
+T_0.12 ;
+    %load/vec4 v000002aa99acd430_0;
+    %addi 1, 0, 32;
+    %store/vec4 v000002aa99acd430_0, 0, 32;
+    %jmp T_0.0;
+T_0.1 ;
+    %vpi_call/w 3 26 "$display", "PASS Q03" {0 0 0};
+    %vpi_call/w 3 27 "$finish" {0 0 0};
+    %end;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 5;
+    "N/A";
+    "<interactive>";
+    "-";
+    "tb/pdf_q03_tb.v";
+    "./qa/pdf_q03_q06/q03_logic_gates.v";
