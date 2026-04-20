@@ -6,11 +6,11 @@ module pdf_q26_tb;
     reg rst_n;
     wire clk_div3;
 
-    integer clk_cycles;
+    integer counter;
     integer rise_count;
     integer last_rise_cycle;
 
-    q26_clock_div3_duty50 #(.DUTY_MODE(1)) dut (
+    q26_clock_div3_duty50 dut (
         .clk(clk),
         .rst_n(rst_n),
         .clk_div3(clk_div3)
@@ -20,21 +20,21 @@ module pdf_q26_tb;
 
     always @(posedge clk) begin
         if (!rst_n)
-            clk_cycles <= 0;
+            counter <= 0;
         else
-            clk_cycles <= clk_cycles + 1;
+            counter <= counter + 1;
     end
 
     always @(posedge clk_div3) begin
         if (rst_n) begin
             if (rise_count > 0) begin
-                if ((clk_cycles - last_rise_cycle) !== 3) begin
+                if ((counter - last_rise_cycle) !== 3) begin
                     $display("FAIL Q26: rising-edge spacing expected 3 cycles, got %0d",
-                             (clk_cycles - last_rise_cycle));
+                             (counter - last_rise_cycle));
                     $finish;
                 end
             end
-            last_rise_cycle <= clk_cycles;
+            last_rise_cycle <= counter;
             rise_count <= rise_count + 1;
         end
     end
@@ -42,7 +42,7 @@ module pdf_q26_tb;
     initial begin
         clk = 1'b0;
         rst_n = 1'b0;
-        clk_cycles = 0;
+        counter = 0;
         rise_count = 0;
         last_rise_cycle = 0;
 
