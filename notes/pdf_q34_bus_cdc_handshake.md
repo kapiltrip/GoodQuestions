@@ -637,25 +637,44 @@ This example uses a toggle handshake. Every new transfer toggles `req_src`. The 
 module bus_cdc_handshake #(
     parameter WIDTH = 8
 )(
+    // Source clock domain.
     input  wire             src_clk,
     input  wire             src_rst_n,
+
+    // Destination clock domain.
     input  wire             dst_clk,
     input  wire             dst_rst_n,
 
+    // Source-side input word.
+    // src_valid must mean src_data is a clean source-domain word now.
     input  wire [WIDTH-1:0] src_data,
     input  wire             src_valid,
+
+    // Backpressure to source logic.
+    // src_ready = 1 means this CDC block can accept a new source word.
     output wire             src_ready,
 
+    // Destination-side output word and one-cycle valid pulse.
     output reg  [WIDTH-1:0] dst_data,
     output reg              dst_valid
 );
 
+    // src_hold is the real bus that crosses domains.
+    // It is a source-domain register, loaded only when a transfer starts.
+    // After loading, it must remain unchanged until ack returns.
     reg [WIDTH-1:0] src_hold;
+
+    // One-bit toggle request. Every toggle means:
+    // "src_hold contains a new word for the destination."
     reg             req_src;
 
+    // Destination-domain two-flop synchronizer for req_src.
+    // These flops synchronize only the 1-bit control request.
     reg             req_dst_ff1;
     reg             req_dst_ff2;
 
+    // ack_dst stores the last request value already consumed in dst_clk.
+    // ack_src_ff1/2 synchronize that acknowledge back into src_clk.
     reg             ack_dst;
     reg             ack_src_ff1;
     reg             ack_src_ff2;
@@ -664,6 +683,11 @@ module bus_cdc_handshake #(
     // acknowledged back into the source domain.
     assign src_ready = (req_src == ack_src_ff2);
 
+    // SOURCE BLOCK:
+    // Input:  src_data, src_valid, src_ready
+    // Action: when source has valid data and CDC is ready, copy src_data
+    //         into src_hold and toggle req_src to announce a new transfer.
+    // Output: src_hold stays stable; req_src changes state once.
     always @(posedge src_clk or negedge src_rst_n) begin
         if (!src_rst_n) begin
             src_hold <= {WIDTH{1'b0}};
@@ -677,6 +701,10 @@ module bus_cdc_handshake #(
         end
     end
 
+    // REQUEST SYNC BLOCK:
+    // Input:  req_src from the source clock domain
+    // Action: pass req_src through two destination-clock flops
+    // Output: req_dst_ff2 is the safe destination-domain request value.
     always @(posedge dst_clk or negedge dst_rst_n) begin
         if (!dst_rst_n) begin
             req_dst_ff1 <= 1'b0;
@@ -689,6 +717,11 @@ module bus_cdc_handshake #(
         end
     end
 
+    // DESTINATION CAPTURE BLOCK:
+    // Input:  synchronized req_dst_ff2 and held bus src_hold
+    // Action: if req_dst_ff2 differs from ack_dst, a new source word is pending.
+    //         Capture the whole stable bus into dst_data and pulse dst_valid.
+    // Output: dst_data has the transferred word; ack_dst marks it received.
     always @(posedge dst_clk or negedge dst_rst_n) begin
         if (!dst_rst_n) begin
             dst_data  <= {WIDTH{1'b0}};
@@ -709,6 +742,10 @@ module bus_cdc_handshake #(
         end
     end
 
+    // ACKNOWLEDGE SYNC BLOCK:
+    // Input:  ack_dst from the destination clock domain
+    // Action: synchronize ack_dst back into the source clock domain
+    // Output: ack_src_ff2 lets src_ready go high for the next word.
     always @(posedge src_clk or negedge src_rst_n) begin
         if (!src_rst_n) begin
             ack_src_ff1 <= 1'b0;

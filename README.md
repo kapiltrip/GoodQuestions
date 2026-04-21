@@ -47,3 +47,4 @@
 | 32 | Design a circuit to synchronize a signal from slow clock domain to fast clock domain | Theory + Code | [notes/pdf_q32_slow_to_fast_sync.md](notes/pdf_q32_slow_to_fast_sync.md) |
 | 33 | How would the previous circuit change from fast domain to slow domain? | Theory + Code | [notes/pdf_q33_fast_to_slow_handshake.md](notes/pdf_q33_fast_to_slow_handshake.md) |
 | 34 | How would you synchronize a data bus instead? | Theory + Code | [notes/pdf_q34_bus_cdc_handshake.md](notes/pdf_q34_bus_cdc_handshake.md) |
+| 35 | Why are Gray coding techniques used for clock domain crossings? | Theory + Code | [notes/pdf_q35_gray_code_cdc.md](notes/pdf_q35_gray_code_cdc.md) |
