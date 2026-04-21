@@ -4,21 +4,18 @@
 module pdf_q27_tb;
     reg clk;
     reg rst_n;
-    reg [3:0] divider_value; // N = divider_value + 1
-    wire clk_out;
+    wire clk_div;
 
     integer clk_cycles;
     integer rise_count;
     integer last_rise_cycle;
 
-    q27_clock_div_n #(
-        .MAX_N(16),
-        .DUTY_MODE(1)
+    clk_div_n #(
+        .N(5)
     ) dut (
         .clk(clk),
         .rst_n(rst_n),
-        .divider_value(divider_value),
-        .clk_out(clk_out)
+        .clk_div(clk_div)
     );
 
     always #5 clk = ~clk;
@@ -30,7 +27,7 @@ module pdf_q27_tb;
             clk_cycles <= clk_cycles + 1;
     end
 
-    always @(posedge clk_out) begin
+    always @(posedge clk_div) begin
         if (rst_n) begin
             if (rise_count > 0) begin
                 if ((clk_cycles - last_rise_cycle) !== 5) begin
@@ -47,7 +44,6 @@ module pdf_q27_tb;
     initial begin
         clk = 1'b0;
         rst_n = 1'b0;
-        divider_value = 4'd4; // divide by N=5
         clk_cycles = 0;
         rise_count = 0;
         last_rise_cycle = 0;
@@ -63,7 +59,7 @@ module pdf_q27_tb;
             end
         end
 
-        $display("FAIL Q27: timeout waiting for enough clk_out edges");
+        $display("FAIL Q27: timeout waiting for enough clk_div edges");
         $finish;
     end
 endmodule

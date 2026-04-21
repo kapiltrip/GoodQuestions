@@ -1,4 +1,6 @@
-module q26_clock_div3_duty50 (
+module q26_clock_div3_duty50 #(
+    parameter integer DUTY_CYCLE = 50
+) (
     input  wire clk,
     input  wire rst_n,
     output wire clk_div3
@@ -18,7 +20,7 @@ module q26_clock_div3_duty50 (
             if (counter == 2'b10)
                 counter <= 2'b00;
             else
-                counter <= counter + 2'b01;
+                counter <= counter + 1'b1;
 
             clk_pos <= (counter == 2'b10);
         end
@@ -31,5 +33,15 @@ module q26_clock_div3_duty50 (
             clk_neg <= clk_pos;
     end
 
-    assign clk_div3 = clk_pos | clk_neg;
+    wire duty_33  = clk_pos;
+    wire duty_50  = clk_pos | clk_neg;
+    wire duty_66  = (counter != 2'b00);
+    wire duty_100 = 1'b1;
+
+    assign clk_div3 = (DUTY_CYCLE == 33)  ? duty_33  :
+                      (DUTY_CYCLE == 50)  ? duty_50  :
+                      ((DUTY_CYCLE == 66) ||
+                       (DUTY_CYCLE == 67)) ? duty_66 :
+                      (DUTY_CYCLE == 100) ? duty_100 :
+                                             duty_50;
 endmodule

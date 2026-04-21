@@ -1,18 +1,9 @@
-module q27_clock_div_n #(
-    // Maximum supported divide ratio N.
-    // divider_value is programmed as N-1.
-    parameter MAX_N = 256,
-    // Duty selector:
-    // 0 -> narrow pulse  (~1/N high)
-    // 1 -> near 50%      (exact for even N)
-    // 2 -> wide pulse    (~(N-1)/N high)
-    // 3 -> 100% high
-    parameter integer DUTY_MODE = 0
+module clk_div_n #(
+    parameter integer N = 4
 ) (
-    clk,
-    rst_n,
-    divider_value,
-    clk_out
+    input  wire clk,
+    input  wire rst_n,
+    output wire clk_div
 );
     function integer clog2;
         input integer value;
@@ -25,62 +16,41 @@ module q27_clock_div_n #(
         end
     endfunction
 
-    localparam WIDTH = clog2(MAX_N);
+    localparam integer WIDTH = clog2(N);
+    localparam integer HALF  = N / 2;
 
-    input  wire             clk;
-    input  wire             rst_n;
-    input  wire [WIDTH-1:0] divider_value; // program N-1
-    output wire             clk_out;
-    reg [WIDTH-1:0] posedge_cnt;
-    reg rise_pulse_reg;
-    reg neg_pulse_reg;
+    // Counts input clock cycles in sequence: 0, 1, ... N-1, then repeats.
+    reg [WIDTH-1:0] counter;
+    // Posedge-generated divided clock. Exact 50% duty for even N.
+    reg pos;
+    // Delayed copy of pos taken on the falling edge.
+    // Used to extend odd-N high time by half an input clock cycle.
+    reg neg;
 
-    // N = divider_value + 1
-    // odd N => divider_value is even
-    wire odd_n = ~divider_value[0];
-    wire [WIDTH-1:0] half_point = divider_value >> 1;
-
-    // Assumption: divider_value >= 1 (i.e., N >= 2)
-    // Counter runs: 0 .. divider_value
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
-            posedge_cnt <= {WIDTH{1'b0}};
-        else if (posedge_cnt == divider_value)
-            posedge_cnt <= {WIDTH{1'b0}};
-        else
-            posedge_cnt <= posedge_cnt + 1'b1;
+        if (!rst_n) begin
+            counter <= {WIDTH{1'b0}};
+            pos <= 1'b0;
+        end else begin
+            if (counter == N-1)
+                counter <= {WIDTH{1'b0}};
+            else
+                counter <= counter + 1'b1;
+
+            pos <= (counter < HALF);
+        end
     end
 
-    // Build base high window in posedge domain
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
-            rise_pulse_reg <= 1'b0;
-        else if (posedge_cnt == half_point)
-            rise_pulse_reg <= 1'b1;
-        else if (posedge_cnt == divider_value)
-            rise_pulse_reg <= 1'b0;
-    end
-
-    // For odd N, extend by half cycle using negedge sample
     always @(negedge clk or negedge rst_n) begin
         if (!rst_n)
-            neg_pulse_reg <= 1'b0;
-        else if (odd_n)
-            neg_pulse_reg <= rise_pulse_reg;
+            neg <= 1'b0;
         else
-            neg_pulse_reg <= 1'b0;
+            neg <= pos;
     end
 
-    // Different duty-cycle outputs on the same /N period.
-    wire duty1       = (posedge_cnt == divider_value); // high for 1 count
-    wire duty50      = rise_pulse_reg | neg_pulse_reg; // near 50%
-    wire dutyNminus1 = (posedge_cnt != {WIDTH{1'b0}}); // low for 1 count
-    wire duty100     = 1'b1;                           // always high
+    wire duty_even = pos;
+    wire duty_odd  = pos | neg;
 
-    // Select output style.
-    assign clk_out = (DUTY_MODE == 0) ? duty1       :
-                     (DUTY_MODE == 1) ? duty50      :
-                     (DUTY_MODE == 2) ? dutyNminus1 :
-                     (DUTY_MODE == 3) ? duty100     :
-                                        duty50;
+    assign clk_div = ((N % 2) == 0) ? duty_even:
+                                      duty_odd;
 endmodule

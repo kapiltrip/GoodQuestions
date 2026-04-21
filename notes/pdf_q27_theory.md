@@ -1,20 +1,23 @@
 # PDF Theory Notes (Q27)
 
-## 27) Clock divide by N
+## 27) Clock Divide By N
 
-- In this implementation, `divider_value` programs `N-1`.
-  So actual divide value is:
-  `N = divider_value + 1`.
-- A counter runs from `0` to `divider_value`, then wraps.
+- `N` is a parameter, so the divide value is fixed when the module is instantiated.
+- The counter runs from `0` to `N-1`, then returns to `0`.
 - Output frequency is:
   `f_out = f_in / N`.
 
-- For even `N`, posedge logic alone gives 50% duty.
-- For odd `N`, the design uses dual-edge logic:
-  generate `rise_pulse_reg` on posedge and copy it to `neg_pulse_reg` on negedge,
-  then OR them:
-  `clk_out = rise_pulse_reg | neg_pulse_reg`.
-- This extends high time by half-cycle and gives near-50% duty for odd dividers.
+The output is high while:
 
-- Safety behavior in code:
-  if `divider_value=0`, it is clamped to `1` (minimum divide-by-2).
+```verilog
+count < (N/2)
+```
+
+So for even `N`, the duty cycle is 50%.
+
+For odd `N`, this simple version is not exactly 50% duty. Example for `N=5`:
+
+- high for 2 input clock cycles
+- low for 3 input clock cycles
+
+This keeps the code simple and still divides the frequency by `N`.
