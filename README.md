@@ -38,3 +38,12 @@
 | 32 | Frequency division `/3` for 33.33%, 66.67%, and exact 50% duty cycle | Theory (cited note) | `frequency_division/f_div_3_all_duty_cycles.md` |
 | 33 | Frequency division `/5` for 20%, 40%, 60%, 80%, and exact 50% duty cycle | Theory (cited note) | `frequency_division/f_div_5_all_duty_cycles.md` |
 | 34 | Frequency division `/7` for 14.29%, 28.57%, 42.86%, 57.14%, 71.43%, 85.71%, and exact 50% duty cycle | Theory (cited note) | `frequency_division/f_div_7_all_duty_cycles.md` |
+
+## Notebook Theory Questions
+
+| No. | Question | Type | File(s) |
+| --- | --- | --- | --- |
+| 31 | What is metastability? | Theory | [notes/pdf_q31_metastability.md](notes/pdf_q31_metastability.md) |
+| 32 | Design a circuit to synchronize a signal from slow clock domain to fast clock domain | Theory + Code | [notes/pdf_q32_slow_to_fast_sync.md](notes/pdf_q32_slow_to_fast_sync.md) |
+| 33 | How would the previous circuit change from fast domain to slow domain? | Theory + Code | [notes/pdf_q33_fast_to_slow_handshake.md](notes/pdf_q33_fast_to_slow_handshake.md) |
+| 34 | How would you synchronize a data bus instead? | Theory + Code | [notes/pdf_q34_bus_cdc_handshake.md](notes/pdf_q34_bus_cdc_handshake.md) |
