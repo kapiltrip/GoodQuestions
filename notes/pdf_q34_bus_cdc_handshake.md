@@ -6,6 +6,62 @@ Do **not** synchronize every bit of a multi-bit bus using separate two-flop sync
 
 That method is unsafe because each bit is synchronized independently. Some bits may update at the destination synchronizer output on one destination clock edge, while other bits may update on the next destination clock edge. This is often described as some bits taking one destination-cycle path and other bits taking a two destination-cycle path. The destination can then see a mixed value that never existed in the source domain.
 
+## Short discussion takeaway
+
+In this bus CDC method, we are **not** synchronizing the bus bits one by one.
+
+What actually happens is:
+
+```text
+1. source captures the bus into src_hold
+2. source keeps src_hold stable
+3. source sends a 1-bit req control signal
+4. destination synchronizes req
+5. destination uses synchronized req as permission to capture src_hold
+6. destination sends ack back
+7. source synchronizes ack and then may update src_hold again
+```
+
+So the accurate wording is:
+
+```text
+The handshake bits are synchronized.
+The bus register is held stable and sampled.
+```
+
+The bus does not become safe because each data bit was synchronized. The bus becomes safe because the source promises:
+
+```text
+I already captured a clean word in src_hold.
+I will not change src_hold until the destination acknowledges it.
+```
+
+The request bit does not inspect the bus. It does not prove that every bus bit is stable. It only tells the destination that, according to the protocol, the source has finished preparing the word and is holding it.
+
+So if `src_hold` captured a wrong word, the handshake will still transfer that wrong word safely. Capturing the correct word into `src_hold` is the sender/source-side responsibility.
+
+The clean separation is:
+
+```text
+src_data -> src_hold
+    sender/source-side timing or earlier CDC problem
+
+src_hold -> dst_data
+    bus CDC handshake problem
+```
+
+If the individual bits inside `src_data` are changing too fast before `src_hold` captures them, ask where those bits come from:
+
+```text
+same src_clk domain:
+    normal setup/hold timing problem into src_hold
+
+another unrelated clock domain:
+    another CDC problem before this bus handshake
+```
+
+In both cases, this bus CDC method starts only after `src_hold` contains a clean word.
+
 ## Deep reason behind this statement
 
 A two-flop synchronizer solves a **single-bit metastability problem**. It does not solve a **multi-bit consistency problem**.
@@ -218,6 +274,57 @@ src_data ----> [ source hold register ] ------------------> [ destination data r
 ```
 
 The source-side data register holds the bus constant while the request is crossing the clock-domain boundary. The destination side does not use the bus immediately. It waits until the synchronized request says the bus is valid and stable.
+
+## How can one control signal tell that the bus is stable?
+
+The control signal does **not** inspect the bus.
+
+It does not check every bit. It does not measure whether the bus is electrically stable. It only has meaning because the source and destination follow a protocol.
+
+The protocol promise is:
+
+```text
+source is allowed to toggle req only after src_hold has captured a valid word
+source is not allowed to change src_hold until ack comes back
+```
+
+So when the destination sees the synchronized request, it trusts this promise:
+
+```text
+if req arrived, then src_hold has already been loaded and is being held stable
+```
+
+That is why the request bit can act like a label for the bus word.
+
+Think of it like this:
+
+```text
+src_hold = the package
+req      = the "package is ready" flag
+ack      = the "package received" flag
+```
+
+The `req` bit does not make the package correct. It only tells the receiver that the sender has finished preparing the package and will not change it until the receiver acknowledges it.
+
+In hardware terms:
+
+```text
+1. source loads src_hold with a clean word
+2. source toggles req
+3. destination synchronizes req
+4. destination captures src_hold
+5. destination toggles/sends ack
+6. source sees ack and may change src_hold for the next word
+```
+
+If the source violates the rule and changes `src_hold` before `ack`, then the control signal is lying. The CDC design is no longer correct.
+
+So the accurate statement is:
+
+```text
+The synchronized control signal does not prove the bus is stable.
+The protocol makes the bus stable, and the control signal tells the destination when to capture it.
+```
 
 ## What if the original bus is changing fast?
 
@@ -553,6 +660,8 @@ module bus_cdc_handshake #(
     reg             ack_src_ff1;
     reg             ack_src_ff2;
 
+    // Source may load a new word only after the previous req has been
+    // acknowledged back into the source domain.
     assign src_ready = (req_src == ack_src_ff2);
 
     always @(posedge src_clk or negedge src_rst_n) begin
@@ -560,6 +669,9 @@ module bus_cdc_handshake #(
             src_hold <= {WIDTH{1'b0}};
             req_src  <= 1'b0;
         end else if (src_valid && src_ready) begin
+            // Capture one clean source-domain word and hold it stable.
+            // The 1-bit req does not synchronize the bus itself; it tells
+            // the destination that this held word is ready to be sampled.
             src_hold <= src_data;
             req_src  <= ~req_src;
         end
@@ -570,6 +682,8 @@ module bus_cdc_handshake #(
             req_dst_ff1 <= 1'b0;
             req_dst_ff2 <= 1'b0;
         end else begin
+            // Only the 1-bit request crosses through a two-flop synchronizer.
+            // The bus crosses as a held stable value, not bit-by-bit sync flops.
             req_dst_ff1 <= req_src;
             req_dst_ff2 <= req_dst_ff1;
         end
@@ -584,8 +698,12 @@ module bus_cdc_handshake #(
             dst_valid <= 1'b0;
 
             if (req_dst_ff2 != ack_dst) begin
+                // A new synchronized req means the source has promised that
+                // src_hold is stable. Capture the whole bus once.
                 dst_data  <= src_hold;
                 dst_valid <= 1'b1;
+                // Ack records that this req value has been received, and later
+                // lets the source change src_hold for the next transfer.
                 ack_dst   <= req_dst_ff2;
             end
         end
@@ -596,6 +714,7 @@ module bus_cdc_handshake #(
             ack_src_ff1 <= 1'b0;
             ack_src_ff2 <= 1'b0;
         end else begin
+            // Synchronize the 1-bit acknowledge back to the source domain.
             ack_src_ff1 <= ack_dst;
             ack_src_ff2 <= ack_src_ff1;
         end
