@@ -113,6 +113,23 @@ destination output:
 
 So `bit[0]` reached the destination output one destination cycle earlier than `bit[1]`.
 
+The assumption in this example is important:
+
+```text
+bit[1] was not permanently wrong.
+It was delayed by one destination clock cycle.
+```
+
+At edge `N`, `FF1_1` captured the old value because `bit[1]` reached it too late, or because the first flop became metastable and did not settle to the new value in time. If the source bus is still holding the new value, then on the next destination clock edge `FF1_1` can capture the correct new value. One more destination edge later, `FF2_1` outputs that correct value.
+
+So the delayed bit can catch up, assuming:
+
+- the source bus remains stable long enough
+- the first synchronizer flop resolves from metastability before the next stage samples an unsafe value
+- the destination does not use the temporary mixed bus value
+
+But the third assumption is exactly the problem. Normal destination logic usually cannot know that the bus is temporarily mixed. That is why using independent synchronizers on every bus bit is unsafe.
+
 This is what the sentence means:
 
 ```text
@@ -201,6 +218,109 @@ src_data ----> [ source hold register ] ------------------> [ destination data r
 ```
 
 The source-side data register holds the bus constant while the request is crossing the clock-domain boundary. The destination side does not use the bus immediately. It waits until the synchronized request says the bus is valid and stable.
+
+## What if the original bus is changing fast?
+
+Then the raw changing bus must **not** be treated as the CDC bus.
+
+The correct CDC path is not:
+
+```text
+fast-changing src_data directly crosses into destination domain
+```
+
+The correct CDC path is:
+
+```text
+fast-changing src_data
+        -> source-domain holding register
+        -> held bus crosses to destination capture register
+```
+
+The source-domain holding register is the important part. It takes one snapshot of the bus when a transfer is accepted.
+
+```verilog
+if (src_valid && src_ready) begin
+    src_hold <= src_data;
+    req_src  <= ~req_src;
+end
+```
+
+After that, `src_hold` must remain unchanged until the acknowledge returns. The original `src_data` may continue changing internally, but those later changes are **not** part of the current CDC transfer.
+
+So when we say:
+
+```text
+keep the bus stable
+```
+
+we mean:
+
+```text
+keep the source holding register stable
+```
+
+not necessarily:
+
+```text
+force every internal source-domain signal to stop changing
+```
+
+## What if data arrives faster than the handshake?
+
+Then this simple handshake can accept only the transfers for which:
+
+```text
+src_valid && src_ready
+```
+
+is true.
+
+If the source changes `src_data` again before `src_ready` returns, there are only three correct choices:
+
+- the source waits and holds that next value until `src_ready` is high
+- the source allows that next value to be dropped
+- the design uses an asynchronous FIFO to buffer multiple values
+
+If the design needs to transfer **every fast-changing bus value**, a one-word handshake is usually not enough. Use an asynchronous FIFO.
+
+If the source ignores `src_ready` and keeps overwriting the value that is supposed to be transferred, then it is not a correct CDC design. The protocol has been broken.
+
+## What if timing constraints do not match?
+
+The handshake makes the bus logically safe only if the held bus has enough time to settle at the destination before the destination captures it.
+
+In the normal handshake sequence:
+
+```text
+source loads src_hold
+source toggles req_src
+req_src passes through two destination flops
+destination captures src_hold
+```
+
+Because `req_src` takes at least two destination clock edges to pass through the synchronizer, the held bus usually has multiple destination cycles to become stable before capture.
+
+But this is still an assumption that the implementation must satisfy. The physical data path from `src_hold` to `dst_data` must not be so slow or skewed that some bits are still arriving when the destination capture happens.
+
+So a correct CDC design needs both:
+
+```text
+protocol correctness:
+    source holds src_hold until acknowledge returns
+
+physical timing correctness:
+    src_hold bits arrive at the destination capture flops within the allowed stable window
+```
+
+If the physical timing cannot meet that stable window, then the choices are:
+
+- add more wait cycles before destination capture
+- constrain the bus path with an appropriate max-delay or bus-skew constraint
+- place/register the logic better so the bus delay is smaller
+- use an asynchronous FIFO or another CDC structure designed for the required rate
+
+Do not think of the handshake as magic. It is correct only when the source obeys the hold rule and the implementation gives the held data enough time to reach the destination capture register.
 
 ## Step-by-step operation
 
