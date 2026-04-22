@@ -93,9 +93,9 @@ This mainly reduces dynamic power because fewer registers and downstream logic t
 Static power is leakage power. It exists even when:
 
 ```text
-clock is stopped
-signals are not changing
-logic is idle
+                                                        clock is stopped
+                                                        signals are not changing
+                                                        logic is idle
 ```
 
 The circuit still leaks because real transistors are not perfect switches.

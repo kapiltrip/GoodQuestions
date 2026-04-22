@@ -64,3 +64,8 @@
 | 49 | Create a 4:1 mux using 2:1 muxes | Theory + Code | [notes/pdf_q49_mux4_using_mux2.md](notes/pdf_q49_mux4_using_mux2.md), [qa/pdf_q49/q49_mux4_from_mux2.v](qa/pdf_q49/q49_mux4_from_mux2.v) |
 | 50 | Frequency, period, propagation delay, and maximum frequency | Theory | [notes/pdf_q50_frequency_period_propagation_delay.md](notes/pdf_q50_frequency_period_propagation_delay.md) |
 | 51 | Convert decimal 13 to binary, hexadecimal, and octal | Theory | [notes/pdf_q51_decimal_13_conversions.md](notes/pdf_q51_decimal_13_conversions.md) |
+| 52 | Four gallons of water with 5-gallon and 3-gallon buckets | Logic Puzzle | [notes/pdf_q52_four_gallons_water.md](notes/pdf_q52_four_gallons_water.md) |
+| 53 | The path to freedom door logic puzzle | Logic Puzzle | [notes/pdf_q53_path_to_freedom.md](notes/pdf_q53_path_to_freedom.md) |
+| 54 | Three light switches and one upstairs trip | Logic Puzzle | [notes/pdf_q54_three_light_switches.md](notes/pdf_q54_three_light_switches.md) |
+| 55 | Multiply question: `ABCD * 9 = DCBA` | Logic Puzzle | [notes/pdf_q55_multiply_question_1089.md](notes/pdf_q55_multiply_question_1089.md) |
+| 56 | Einstein's riddle: who owns the fish? | Logic Puzzle | [notes/pdf_q56_einsteins_riddle.md](notes/pdf_q56_einsteins_riddle.md) |

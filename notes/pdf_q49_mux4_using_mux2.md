@@ -7,12 +7,13 @@
 3. [2:1 mux reminder](#21-mux-reminder)
 4. [4:1 mux truth table](#41-mux-truth-table)
 5. [Mux-tree construction](#mux-tree-construction)
-6. [Boolean equation](#boolean-equation)
-7. [Gate-level interpretation](#gate-level-interpretation)
-8. [Delay and area](#delay-and-area)
-9. [Synthesizable Verilog](#synthesizable-verilog)
-10. [Common mistakes](#common-mistakes)
-11. [49) Interview answer](#49-interview-answer)
+6. [Why some diagrams show both S and S-bar at the same level](#why-some-diagrams-show-both-s-and-s-bar-at-the-same-level)
+7. [Boolean equation](#boolean-equation)
+8. [Gate-level interpretation](#gate-level-interpretation)
+9. [Delay and area](#delay-and-area)
+10. [Synthesizable Verilog](#synthesizable-verilog)
+11. [Common mistakes](#common-mistakes)
+12. [49) Interview answer](#49-interview-answer)
 
 ## 49) Create a 4:1 mux using 2:1 muxes
 
@@ -149,6 +150,88 @@ For `N=4`:
 
 ```text
 4-1 = 3 muxes
+```
+
+## Why some diagrams show both S and S-bar at the same level
+
+There are two different things people draw:
+
+1. a **logical mux block**
+2. the **gate/transistor-level implementation inside the mux**
+
+At the logical block level, both first-level muxes use the same select:
+
+```text
+low_pair  = S0 ? B : A
+high_pair = S0 ? D : C
+```
+
+So the first level is controlled by `S0`, and the second level is controlled by `S1`.
+
+That is what this diagram means:
+
+```text
+A ----\
+       MUX ---- low_pair ----\
+B ----/ S0                   |
+                             MUX ---- Y
+C ----\                      | S1
+       MUX ---- high_pair ---/
+D ----/ S0
+```
+
+But inside a 2:1 mux, the select is normally used in both true and complemented form:
+
+```text
+Y = S'D0 + S D1
+```
+
+That means:
+
+```text
+D0 path is enabled by S'
+D1 path is enabled by S
+```
+
+So a gate-level mux can be drawn as:
+
+```text
+D0 ---- AND with S' ----\
+                         OR ---- Y
+D1 ---- AND with S  ----/
+```
+
+or as transmission gates:
+
+```text
+D0 path controlled by S'
+D1 path controlled by S
+```
+
+This is why a book may show `S0` and `S0_bar` at the same level. It is not saying the two first-level muxes use different select bits. It is showing that each mux needs both phases of the same select to choose between its upper and lower input.
+
+For a 4:1 mux, the full Boolean equation makes this clear:
+
+```text
+Y = S1'S0'A + S1'S0B + S1S0'C + S1S0D
+```
+
+Here:
+
+- `A` and `C` are selected when `S0=0`, so they use `S0'`.
+- `B` and `D` are selected when `S0=1`, so they use `S0`.
+- `A/B` group is selected when `S1=0`, so it uses `S1'`.
+- `C/D` group is selected when `S1=1`, so it uses `S1`.
+
+So both statements are correct, but they are describing different abstraction levels:
+
+```text
+block level:
+    first-level muxes use S0
+    final mux uses S1
+
+gate/transistor level:
+    each mux internally uses S and S'
 ```
 
 ## Boolean equation
@@ -361,9 +444,18 @@ Correct count:
 3 muxes
 ```
 
-### Mistake 3: using inverted selects unnecessarily
+### Mistake 3: misunderstanding S and S-bar in mux diagrams
 
-With the mux-tree structure above, both first-level muxes can use `S0`, and the final mux uses `S1`. You do not need to manually invert selects unless your mux symbol has an active-low select or the diagram uses a different convention.
+With the mux-tree structure above, both first-level muxes logically use `S0`, and the final mux logically uses `S1`.
+
+If a diagram shows `S0` and `S0_bar`, it is usually showing the internal enable signals of the mux:
+
+```text
+S0' enables the D0 path
+S0  enables the D1 path
+```
+
+That does not mean one first-level mux is selected by `S0` and the other by `S0_bar`. Both muxes still respond to the same logical select bit.
 
 ### Mistake 4: writing incomplete combinational RTL
 
