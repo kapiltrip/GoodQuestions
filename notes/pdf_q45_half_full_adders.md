@@ -1,4 +1,4 @@
-# PDF Q45) Half Adder Using XOR, AND, and OR Gates
+# PDF Q45) Half Adders, Full Adders, Half Subtractors, and Full Subtractors
 
 ## Index
 
@@ -10,10 +10,15 @@
 6. [Full adder from two half adders](#full-adder-from-two-half-adders)
 7. [Full-adder equations](#full-adder-equations)
 8. [4-bit ripple-carry adder](#4-bit-ripple-carry-adder)
-9. [Timing and carry propagation](#timing-and-carry-propagation)
-10. [Synthesizable Verilog](#synthesizable-verilog)
-11. [Common interview mistakes](#common-interview-mistakes)
-12. [45) Interview answer](#45-interview-answer)
+9. [Half subtractor](#half-subtractor)
+10. [Full subtractor from two half subtractors](#full-subtractor-from-two-half-subtractors)
+11. [Full-subtractor equations](#full-subtractor-equations)
+12. [4-bit ripple-borrow subtractor](#4-bit-ripple-borrow-subtractor)
+13. [Adder-subtractor connection](#adder-subtractor-connection)
+14. [Timing and carry/borrow propagation](#timing-and-carryborrow-propagation)
+15. [Synthesizable Verilog](#synthesizable-verilog)
+16. [Common interview mistakes](#common-interview-mistakes)
+17. [45) Interview answer](#45-interview-answer)
 
 ## 45) Half adder using XOR, AND, and OR gates
 
@@ -28,6 +33,8 @@ assign {cout, sum} = a + b + cin;
 But for interviews you should also understand what logic synthesis is building underneath.
 
 ## Direct answer
+
+For addition:
 
 A half adder adds two 1-bit inputs:
 
@@ -60,6 +67,56 @@ A ----\
       AND ---- carry
 B ----/
 ```
+
+For subtraction:
+
+A half subtractor subtracts two 1-bit inputs:
+
+```text
+A - B
+```
+
+It produces:
+
+```text
+difference = A XOR B
+borrow     = A' AND B
+```
+
+Equations:
+
+```text
+difference = A'B + AB'
+borrow     = A'B
+```
+
+A full subtractor subtracts:
+
+```text
+A - B - Bin
+```
+
+It produces:
+
+```text
+difference = A ^ B ^ Bin
+borrow_out = A'B + Bin(A ^ B)'
+```
+
+Equivalent expanded borrow equation:
+
+```text
+borrow_out = A'B + A'Bin + BBin
+```
+
+For the full adder carry, the two common equations are:
+
+```text
+Cout = AB + Cin(A ^ B)
+Cout = AB + ACin + BCin
+```
+
+Both are the same function.
 
 ## Half-adder truth table
 
@@ -239,12 +296,58 @@ Carry is majority-of-three:
 Cout = AB + ACin + BCin
 ```
 
-The two-half-adder expression is equivalent:
+The two-half-adder expression is also very common:
+
+```text
+Cout = AB + Cin(A ^ B)
+```
+
+So the two carry equations you should remember are:
+
+```text
+Equation 1: Cout = AB + Cin(A ^ B)
+Equation 2: Cout = AB + ACin + BCin
+```
+
+They are equivalent. The first form uses generate/propagate thinking:
+
+```text
+G = AB
+P = A ^ B
+Cout = G + P.Cin
+```
+
+The second form is the majority form:
+
+```text
+Cout is 1 when at least two of A, B, Cin are 1.
+```
+
+Proof that the first form becomes the expanded form:
 
 ```text
 Cout = AB + Cin(A ^ B)
      = AB + Cin(A'B + AB')
      = AB + A'BCin + AB'Cin
+```
+
+Now compare it to the majority form:
+
+```text
+AB + ACin + BCin
+```
+
+The extra-looking terms are absorbed by `AB` when both `A` and `B` are high:
+
+```text
+AB + ABCin = AB
+```
+
+So:
+
+```text
+AB + A'BCin + AB'Cin
+= AB + BCin + ACin
 ```
 
 This is the same function as majority carry. When `A=B=1`, `AB` already covers both `Cin=0` and `Cin=1`.
@@ -276,7 +379,272 @@ The arithmetic result is:
 {Cout, R3, R2, R1, R0} = A[3:0] + B[3:0] + Cin
 ```
 
-## Timing and carry propagation
+## Half subtractor
+
+A half subtractor subtracts one bit from another:
+
+```text
+A - B
+```
+
+It produces:
+
+```text
+difference
+borrow
+```
+
+Truth table:
+
+```text
+A B | decimal A-B | difference | borrow
+----+-------------+------------+-------
+0 0 |      0      |     0      |   0
+0 1 |     -1      |     1      |   1
+1 0 |      1      |     1      |   0
+1 1 |      0      |     0      |   0
+```
+
+Why `0 - 1` gives `difference=1, borrow=1`:
+
+```text
+borrow 1 from the next higher bit
+2 + 0 - 1 = 1
+```
+
+So for a single bit:
+
+```text
+0 - 1 = borrow from next bit, local difference 1
+```
+
+Equations:
+
+```text
+difference = A ^ B
+borrow     = A'B
+```
+
+The difference equation is the same as half-adder sum because addition and subtraction both need to detect "inputs are different" at the bit level.
+
+The borrow equation is different from carry:
+
+```text
+carry  = AB
+borrow = A'B
+```
+
+Carry says:
+
+```text
+both inputs are 1, so result overflows to next bit
+```
+
+Borrow says:
+
+```text
+A is 0 but B is 1, so this bit cannot subtract without borrowing
+```
+
+## Full subtractor from two half subtractors
+
+A full subtractor subtracts three 1-bit values:
+
+```text
+A - B - Bin
+```
+
+where `Bin` is borrow-in from the previous lower bit.
+
+Build it using two half subtractors:
+
+```text
+Half subtractor 1:
+    diff_ab   = A ^ B
+    borrow_ab = A'B
+
+Half subtractor 2:
+    diff       = diff_ab ^ Bin
+    borrow_bin = diff_ab' Bin
+
+Final borrow:
+    Bout = borrow_ab | borrow_bin
+```
+
+So:
+
+```text
+difference = A ^ B ^ Bin
+Bout       = A'B + Bin(A ^ B)'
+```
+
+The OR gate combines the two possible borrow sources:
+
+- `A'B`: borrow needed when subtracting `B` from `A`
+- `Bin(A ^ B)'`: borrow needed when the intermediate difference cannot pay the incoming borrow
+
+## Full-subtractor equations
+
+Truth table:
+
+```text
+A B Bin | difference | Bout
+--------+------------+-----
+0 0  0  |     0      |  0
+0 0  1  |     1      |  1
+0 1  0  |     1      |  1
+0 1  1  |     0      |  1
+1 0  0  |     1      |  0
+1 0  1  |     0      |  0
+1 1  0  |     0      |  0
+1 1  1  |     1      |  1
+```
+
+Difference is odd parity:
+
+```text
+difference = A ^ B ^ Bin
+```
+
+Borrow has two common forms.
+
+Two-half-subtractor form:
+
+```text
+Bout = A'B + Bin(A ^ B)'
+```
+
+Expanded majority-like borrow form:
+
+```text
+Bout = A'B + A'Bin + BBin
+```
+
+Meaning:
+
+```text
+Bout is 1 when B plus Bin is larger than A at this bit.
+```
+
+Proof from the two-half-subtractor form:
+
+```text
+Bout = A'B + Bin(A ^ B)'
+     = A'B + Bin(A'B' + AB)
+     = A'B + A'B'Bin + ABBin
+```
+
+This is equivalent to:
+
+```text
+A'B + A'Bin + BBin
+```
+
+because:
+
+```text
+A'Bin = A'B'Bin + A'BBin
+BBin  = A'BBin + ABBin
+```
+
+and the `A'BBin` part is already covered by `A'B`.
+
+## 4-bit ripple-borrow subtractor
+
+To build a 4-bit subtractor, chain four full subtractors:
+
+```text
+bit0: A0 - B0 - borrow0 -> D0, borrow1
+bit1: A1 - B1 - borrow1 -> D1, borrow2
+bit2: A2 - B2 - borrow2 -> D2, borrow3
+bit3: A3 - B3 - borrow3 -> D3, Bout
+```
+
+Use clearer names:
+
+```text
+borrow0 = external Bin
+borrow1 = borrow out of bit0
+borrow2 = borrow out of bit1
+borrow3 = borrow out of bit2
+borrow4 = final Bout
+```
+
+ASCII view:
+
+```text
+Bin -> FS0 -> borrow1 -> FS1 -> borrow2 -> FS2 -> borrow3 -> FS3 -> Bout
+       |                 |                 |                 |
+       D0                D1                D2                D3
+```
+
+This is called a ripple-borrow subtractor because the borrow must ripple from the least significant bit toward the most significant bit.
+
+The arithmetic result is:
+
+```text
+{Bout, D3, D2, D1, D0} represents A[3:0] - B[3:0] - Bin
+```
+
+For unsigned subtraction:
+
+```text
+Bout = 1 means the subtraction underflowed and needed a borrow beyond the MSB.
+```
+
+Example:
+
+```text
+A = 0010
+B = 0101
+Bin = 0
+
+2 - 5 underflows in unsigned 4-bit arithmetic.
+Bout = 1
+```
+
+## Adder-subtractor connection
+
+Subtraction can also be implemented using an adder and two's complement:
+
+```text
+A - B = A + (~B) + 1
+```
+
+For an add/subtract unit:
+
+```text
+subtract = 0:
+    result = A + B
+
+subtract = 1:
+    result = A + ~B + 1
+```
+
+RTL pattern:
+
+```verilog
+assign b_to_adder = b ^ {WIDTH{subtract}};
+assign {cout, result} = a + b_to_adder + subtract;
+```
+
+When `subtract=0`:
+
+```text
+b_to_adder = b
+carry-in   = 0
+```
+
+When `subtract=1`:
+
+```text
+b_to_adder = ~b
+carry-in   = 1
+```
+
+This method is common in real datapaths because one adder can perform both addition and subtraction.
+
+## Timing and carry/borrow propagation
 
 The main weakness of ripple-carry adders is delay.
 
@@ -306,6 +674,20 @@ That is why faster adders exist:
 - prefix adders such as Kogge-Stone or Brent-Kung
 
 For small adders, ripple carry is simple and often good enough. For wide high-speed datapaths, carry propagation becomes critical.
+
+Ripple-borrow subtractors have the same style of problem:
+
+```text
+a high bit's difference may depend on borrow generated many lower bits earlier
+```
+
+For an `N`-bit ripple subtractor:
+
+```text
+borrow delay grows roughly proportional to N
+```
+
+In practice, wide add/subtract datapaths are usually optimized by synthesis or implemented with faster carry-chain hardware in FPGAs.
 
 ## Synthesizable Verilog
 
@@ -368,13 +750,65 @@ assign sum  = a ^ b ^ cin;
 assign cout = (a & b) | (cin & (a ^ b));
 ```
 
+Same carry using the majority equation:
+
+```verilog
+assign cout = (a & b) | (a & cin) | (b & cin);
+```
+
 Behavioral 4-bit adder:
 
 ```verilog
 assign {cout, sum} = a + b + cin;
 ```
 
-This behavioral version is normally what you would write in production RTL unless the interview specifically asks for a structural gate-level construction.
+Half subtractor:
+
+```verilog
+module q45_half_subtractor (
+    input  wire a,
+    input  wire b,
+    output wire diff,
+    output wire borrow
+);
+    assign diff   = a ^ b;
+    assign borrow = ~a & b;
+endmodule
+```
+
+Full subtractor:
+
+```verilog
+module q45_full_subtractor_boolean (
+    input  wire a,
+    input  wire b,
+    input  wire bin,
+    output wire diff,
+    output wire bout
+);
+    assign diff = a ^ b ^ bin;
+
+    assign bout = (~a & b) | (bin & ~(a ^ b));
+endmodule
+```
+
+Equivalent full-subtractor borrow equation:
+
+```verilog
+assign bout = (~a & b) | (~a & bin) | (b & bin);
+```
+
+Behavioral 4-bit subtractor:
+
+```verilog
+wire [4:0] full_result;
+
+assign full_result = {1'b0, a} - {1'b0, b} - bin;
+assign diff        = full_result[3:0];
+assign bout        = full_result[4];
+```
+
+These behavioral versions are normally what you would write in production RTL unless the interview specifically asks for a structural gate-level construction.
 
 ## Common interview mistakes
 
@@ -417,6 +851,55 @@ Both are possible ways to create the final carry.
 
 Ripple adders are simple and often fine for small widths or low-speed paths. They become a problem when the carry chain delay is on the critical path.
 
+### Mistake 5: using carry equation for borrow
+
+Carry and borrow are not the same condition.
+
+For a half adder:
+
+```text
+carry = AB
+```
+
+For a half subtractor:
+
+```text
+borrow = A'B
+```
+
+Borrow depends on `A` being too small to subtract `B`.
+
+### Mistake 6: remembering only one full-adder carry form
+
+Both forms are useful:
+
+```text
+Cout = AB + Cin(A ^ B)
+Cout = AB + ACin + BCin
+```
+
+The first is generate/propagate style. The second is majority-of-three style.
+
+### Mistake 7: forgetting borrow-in in full subtraction
+
+A full subtractor computes:
+
+```text
+A - B - Bin
+```
+
+not just:
+
+```text
+A - B
+```
+
+So:
+
+```text
+difference = A ^ B ^ Bin
+```
+
 ## 45) Interview answer
 
-A half adder adds two one-bit inputs. The sum is high when exactly one input is high, so `sum = A ^ B = A'B + AB'`. The carry is high only when both inputs are high, so `carry = A & B`. A full adder can be made from two half adders: first add `A` and `B`, then add that intermediate sum to `Cin`, and OR the two carry outputs. That gives `sum = A ^ B ^ Cin` and `Cout = AB + Cin(A ^ B)`, equivalent to the majority function `AB + ACin + BCin`. A multibit ripple adder chains full adders so each carry-out feeds the next bit's carry-in.
+A half adder adds two one-bit inputs. The sum is high when exactly one input is high, so `sum = A ^ B = A'B + AB'`. The carry is high only when both inputs are high, so `carry = A & B`. A full adder can be made from two half adders: first add `A` and `B`, then add that intermediate sum to `Cin`, and OR the two carry outputs. That gives `sum = A ^ B ^ Cin` and the carry can be written either as `Cout = AB + Cin(A ^ B)` or as `Cout = AB + ACin + BCin`. For subtraction, a half subtractor has `difference = A ^ B` and `borrow = A'B`. A full subtractor computes `A - B - Bin`, so `difference = A ^ B ^ Bin` and `Bout = A'B + Bin(A ^ B)'`, equivalently `Bout = A'B + A'Bin + BBin`. Multibit adders and subtractors are built by rippling carry or borrow from the LSB toward the MSB.

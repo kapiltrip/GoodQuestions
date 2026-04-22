@@ -57,7 +57,7 @@
 | 42 | Transistor-level equivalent of digital logic gates | Theory + Code | [notes/pdf_q42_cmos_logic_gates.md](notes/pdf_q42_cmos_logic_gates.md) |
 | 43 | Cross section of a CMOS transistor | Theory | [notes/pdf_q43_cmos_transistor_cross_section.md](notes/pdf_q43_cmos_transistor_cross_section.md) |
 | 44 | FSMs, Karnaugh maps, and Gray-code divide-by-3 design | Theory + Code | [notes/pdf_q44_fsm_kmap_gray_code.md](notes/pdf_q44_fsm_kmap_gray_code.md), [qa/pdf_q44/q44_div3_gray_fsm.v](qa/pdf_q44/q44_div3_gray_fsm.v) |
-| 45 | Half adder, full adder, and multibit ripple-carry adder | Theory + Code | [notes/pdf_q45_half_full_adders.md](notes/pdf_q45_half_full_adders.md), [qa/pdf_q45/q45_adders.v](qa/pdf_q45/q45_adders.v) |
+| 45 | Half/full adders and subtractors, including ripple carry/borrow | Theory + Code | [notes/pdf_q45_half_full_adders.md](notes/pdf_q45_half_full_adders.md), [qa/pdf_q45/q45_adders.v](qa/pdf_q45/q45_adders.v) |
 | 46 | Create digital logic gates using a 2:1 mux | Theory + Code | [notes/pdf_q46_gates_using_2to1_mux.md](notes/pdf_q46_gates_using_2to1_mux.md), [qa/pdf_q46/q46_gates_using_mux2.v](qa/pdf_q46/q46_gates_using_mux2.v) |
 | 47 | Use an XOR gate as a controlled inverter | Theory + Code | [notes/pdf_q47_xor_controlled_inverter.md](notes/pdf_q47_xor_controlled_inverter.md), [qa/pdf_q47/q47_xor_controlled_inverter.v](qa/pdf_q47/q47_xor_controlled_inverter.v) |
 | 48 | Design inverter, AND, OR, and XOR using only NAND gates | Theory + Code | [notes/pdf_q48_gates_using_only_nand.md](notes/pdf_q48_gates_using_only_nand.md), [qa/pdf_q48/q48_gates_using_nand.v](qa/pdf_q48/q48_gates_using_nand.v) |
