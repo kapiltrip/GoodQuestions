@@ -633,95 +633,94 @@ When the source sees the synchronized acknowledge, it knows the destination has 
 
 This example uses a toggle handshake. Every new transfer toggles `req_src`. The destination compares the synchronized request against its last acknowledged request. If they differ, a new bus value is available.
 
+The code is kept as one complete module. The comments inside the code explain the role of the variables where they are declared and used.
+
 ```verilog
 module bus_cdc_handshake #(
-    parameter WIDTH = 8
+    parameter WIDTH = 8          // WIDTH is the number of bits in the bus.
 )(
-    // Source clock domain.
+    // src_clk and src_rst_n control all source-domain registers.
     input  wire             src_clk,
     input  wire             src_rst_n,
 
-    // Destination clock domain.
+    // dst_clk and dst_rst_n control all destination-domain registers.
     input  wire             dst_clk,
     input  wire             dst_rst_n,
 
-    // Source-side input word.
-    // src_valid must mean src_data is a clean source-domain word now.
+    // src_data is the source word to transfer.
+    // src_valid says src_data is a clean source-domain word right now.
     input  wire [WIDTH-1:0] src_data,
     input  wire             src_valid,
 
-    // Backpressure to source logic.
-    // src_ready = 1 means this CDC block can accept a new source word.
+    // src_ready tells the source when this CDC block can accept a new word.
     output wire             src_ready,
 
-    // Destination-side output word and one-cycle valid pulse.
+    // dst_data is the received word in the destination clock domain.
+    // dst_valid pulses for one dst_clk cycle when dst_data is newly captured.
     output reg  [WIDTH-1:0] dst_data,
     output reg              dst_valid
 );
 
-    // src_hold is the real bus that crosses domains.
-    // It is a source-domain register, loaded only when a transfer starts.
-    // After loading, it must remain unchanged until ack returns.
+    // src_hold is the source-domain holding register for the bus.
+    // It is loaded once at the start of a transfer and then held stable.
     reg [WIDTH-1:0] src_hold;
 
-    // One-bit toggle request. Every toggle means:
-    // "src_hold contains a new word for the destination."
+    // req_src is the source-domain request toggle.
+    // Every change of req_src means src_hold has a new word.
     reg             req_src;
 
-    // Destination-domain two-flop synchronizer for req_src.
-    // These flops synchronize only the 1-bit control request.
+    // req_dst_ff1 and req_dst_ff2 synchronize req_src into dst_clk.
+    // req_dst_ff2 is the synchronized request used by destination logic.
     reg             req_dst_ff1;
     reg             req_dst_ff2;
 
-    // ack_dst stores the last request value already consumed in dst_clk.
-    // ack_src_ff1/2 synchronize that acknowledge back into src_clk.
+    // ack_dst remembers the latest request already accepted in dst_clk.
+    // ack_src_ff1 and ack_src_ff2 synchronize ack_dst back into src_clk.
+    // ack_src_ff2 is the acknowledge value used by source logic.
     reg             ack_dst;
     reg             ack_src_ff1;
     reg             ack_src_ff2;
 
-    // Source may load a new word only after the previous req has been
-    // acknowledged back into the source domain.
+    // Source ready logic:
+    // req_src is the current request state.
+    // ack_src_ff2 is the last acknowledged request state seen back in src_clk.
+    // If they are equal, no transfer is pending and src_hold may be updated.
     assign src_ready = (req_src == ack_src_ff2);
 
-    // SOURCE BLOCK:
-    // Input:  src_data, src_valid, src_ready
-    // Action: when source has valid data and CDC is ready, copy src_data
-    //         into src_hold and toggle req_src to announce a new transfer.
-    // Output: src_hold stays stable; req_src changes state once.
+    // Source block:
+    // When src_valid and src_ready are both high, src_hold captures src_data.
+    // Then req_src toggles to tell the destination that src_hold is ready.
+    // While src_ready is low, src_hold is not changed.
     always @(posedge src_clk or negedge src_rst_n) begin
         if (!src_rst_n) begin
             src_hold <= {WIDTH{1'b0}};
             req_src  <= 1'b0;
         end else if (src_valid && src_ready) begin
-            // Capture one clean source-domain word and hold it stable.
-            // The 1-bit req does not synchronize the bus itself; it tells
-            // the destination that this held word is ready to be sampled.
             src_hold <= src_data;
             req_src  <= ~req_src;
         end
     end
 
-    // REQUEST SYNC BLOCK:
-    // Input:  req_src from the source clock domain
-    // Action: pass req_src through two destination-clock flops
-    // Output: req_dst_ff2 is the safe destination-domain request value.
+    // Request sync block:
+    // req_src is asynchronous to dst_clk, so it first goes to req_dst_ff1.
+    // req_dst_ff2 is the safer destination-domain version of req_src.
+    // Only the 1-bit request is synchronized this way, not every bus bit.
     always @(posedge dst_clk or negedge dst_rst_n) begin
         if (!dst_rst_n) begin
             req_dst_ff1 <= 1'b0;
             req_dst_ff2 <= 1'b0;
         end else begin
-            // Only the 1-bit request crosses through a two-flop synchronizer.
-            // The bus crosses as a held stable value, not bit-by-bit sync flops.
             req_dst_ff1 <= req_src;
             req_dst_ff2 <= req_dst_ff1;
         end
     end
 
-    // DESTINATION CAPTURE BLOCK:
-    // Input:  synchronized req_dst_ff2 and held bus src_hold
-    // Action: if req_dst_ff2 differs from ack_dst, a new source word is pending.
-    //         Capture the whole stable bus into dst_data and pulse dst_valid.
-    // Output: dst_data has the transferred word; ack_dst marks it received.
+    // Destination capture block:
+    // ack_dst stores the last req_dst_ff2 value that was already consumed.
+    // If req_dst_ff2 differs from ack_dst, a new held bus word is waiting.
+    // dst_data captures the whole src_hold bus once.
+    // dst_valid pulses for that capture cycle.
+    // ack_dst is updated so the source can later see that this word was taken.
     always @(posedge dst_clk or negedge dst_rst_n) begin
         if (!dst_rst_n) begin
             dst_data  <= {WIDTH{1'b0}};
@@ -731,33 +730,149 @@ module bus_cdc_handshake #(
             dst_valid <= 1'b0;
 
             if (req_dst_ff2 != ack_dst) begin
-                // A new synchronized req means the source has promised that
-                // src_hold is stable. Capture the whole bus once.
                 dst_data  <= src_hold;
                 dst_valid <= 1'b1;
-                // Ack records that this req value has been received, and later
-                // lets the source change src_hold for the next transfer.
                 ack_dst   <= req_dst_ff2;
             end
         end
     end
 
-    // ACKNOWLEDGE SYNC BLOCK:
-    // Input:  ack_dst from the destination clock domain
-    // Action: synchronize ack_dst back into the source clock domain
-    // Output: ack_src_ff2 lets src_ready go high for the next word.
+    // Acknowledge sync block:
+    // ack_dst is asynchronous to src_clk, so it first goes to ack_src_ff1.
+    // ack_src_ff2 is the safer source-domain acknowledge value.
+    // When ack_src_ff2 catches up to req_src, src_ready becomes high again.
     always @(posedge src_clk or negedge src_rst_n) begin
         if (!src_rst_n) begin
             ack_src_ff1 <= 1'b0;
             ack_src_ff2 <= 1'b0;
         end else begin
-            // Synchronize the 1-bit acknowledge back to the source domain.
             ack_src_ff1 <= ack_dst;
             ack_src_ff2 <= ack_src_ff1;
         end
     end
 
 endmodule
+```
+
+## Realization
+
+A single control bit goes from the source domain to the destination domain:
+
+```text
+req_src -> req_dst_ff1 -> req_dst_ff2
+```
+
+This synchronized request bit tells the destination:
+
+```text
+the source has placed a new stable word in src_hold
+```
+
+Then the destination checks:
+
+```verilog
+if (req_dst_ff2 != ack_dst)
+```
+
+That condition means:
+
+```text
+this request value is new compared to the last request value already handled
+```
+
+For the first transfer, everything starts at `0` after reset:
+
+```text
+req_src = 0
+ack_dst = 0
+```
+
+So there is no new transfer yet. When the source has a word ready, it toggles:
+
+```text
+req_src: 0 -> 1
+```
+
+After synchronization, the destination sees:
+
+```text
+req_dst_ff2 = 1
+ack_dst     = 0
+```
+
+Now the comparison becomes true:
+
+```text
+req_dst_ff2 != ack_dst
+```
+
+That tells the destination that new data is available in `src_hold`.
+
+For the next transfer, the toggle goes the other way:
+
+```text
+req_src: 1 -> 0
+```
+
+Then the destination eventually sees:
+
+```text
+req_dst_ff2 = 0
+ack_dst     = 1
+```
+
+Again, the values are different, so this also means a new transfer.
+
+So the destination is not looking only for `1`. It is looking for a change compared to `ack_dst`:
+
+```text
+0 -> 1 means new transfer
+1 -> 0 means new transfer
+```
+
+So the destination captures the held bus:
+
+```verilog
+dst_data <= src_hold;
+```
+
+Then the destination updates:
+
+```verilog
+ack_dst <= req_dst_ff2;
+```
+
+That means:
+
+```text
+I have handled this request now
+```
+
+After that, `ack_dst` is synchronized back into the source domain:
+
+```text
+ack_dst -> ack_src_ff1 -> ack_src_ff2
+```
+
+When the source sees:
+
+```verilog
+req_src == ack_src_ff2
+```
+
+it knows:
+
+```text
+the destination has captured the previous word
+```
+
+So the source can send the next word.
+
+The important correction is:
+
+```text
+req_src is not the data bit.
+req_src is the 1-bit request toggle that says a new data word is available in src_hold.
 ```
 
 ## Why this is safe
