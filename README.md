@@ -48,3 +48,19 @@
 | 33 | How would the previous circuit change from fast domain to slow domain? | Theory + Code | [notes/pdf_q33_fast_to_slow_handshake.md](notes/pdf_q33_fast_to_slow_handshake.md) |
 | 34 | How would you synchronize a data bus instead? | Theory + Code | [notes/pdf_q34_bus_cdc_handshake.md](notes/pdf_q34_bus_cdc_handshake.md) |
 | 35 | Why are Gray coding techniques used for clock domain crossings? | Theory + Code | [notes/pdf_q35_gray_code_cdc.md](notes/pdf_q35_gray_code_cdc.md) |
+| 36 | Describe the two components that make up power | Theory | [notes/pdf_q36_q37_power.md](notes/pdf_q36_q37_power.md) |
+| 37 | Describe static power and how to reduce it in RTL | Theory | [notes/pdf_q36_q37_power.md](notes/pdf_q36_q37_power.md) |
+| 38 | Describe dynamic power | Theory | [notes/pdf_q38_q39_dynamic_low_power_rtl.md](notes/pdf_q38_q39_dynamic_low_power_rtl.md) |
+| 39 | Describe low-power techniques with RTL code | Theory + Code | [notes/pdf_q38_q39_dynamic_low_power_rtl.md](notes/pdf_q38_q39_dynamic_low_power_rtl.md) |
+| 40 | Define setup time and hold time | Theory | [notes/pdf_q40_q41_sta_boolean.md](notes/pdf_q40_q41_sta_boolean.md) |
+| 41 | Venn diagram Boolean logic expression and simplification | Theory + Code | [notes/pdf_q40_q41_sta_boolean.md](notes/pdf_q40_q41_sta_boolean.md) |
+| 42 | Transistor-level equivalent of digital logic gates | Theory + Code | [notes/pdf_q42_cmos_logic_gates.md](notes/pdf_q42_cmos_logic_gates.md) |
+| 43 | Cross section of a CMOS transistor | Theory | [notes/pdf_q43_cmos_transistor_cross_section.md](notes/pdf_q43_cmos_transistor_cross_section.md) |
+| 44 | FSMs, Karnaugh maps, and Gray-code divide-by-3 design | Theory + Code | [notes/pdf_q44_fsm_kmap_gray_code.md](notes/pdf_q44_fsm_kmap_gray_code.md), [qa/pdf_q44/q44_div3_gray_fsm.v](qa/pdf_q44/q44_div3_gray_fsm.v) |
+| 45 | Half adder, full adder, and multibit ripple-carry adder | Theory + Code | [notes/pdf_q45_half_full_adders.md](notes/pdf_q45_half_full_adders.md), [qa/pdf_q45/q45_adders.v](qa/pdf_q45/q45_adders.v) |
+| 46 | Create digital logic gates using a 2:1 mux | Theory + Code | [notes/pdf_q46_gates_using_2to1_mux.md](notes/pdf_q46_gates_using_2to1_mux.md), [qa/pdf_q46/q46_gates_using_mux2.v](qa/pdf_q46/q46_gates_using_mux2.v) |
+| 47 | Use an XOR gate as a controlled inverter | Theory + Code | [notes/pdf_q47_xor_controlled_inverter.md](notes/pdf_q47_xor_controlled_inverter.md), [qa/pdf_q47/q47_xor_controlled_inverter.v](qa/pdf_q47/q47_xor_controlled_inverter.v) |
+| 48 | Design inverter, AND, OR, and XOR using only NAND gates | Theory + Code | [notes/pdf_q48_gates_using_only_nand.md](notes/pdf_q48_gates_using_only_nand.md), [qa/pdf_q48/q48_gates_using_nand.v](qa/pdf_q48/q48_gates_using_nand.v) |
+| 49 | Create a 4:1 mux using 2:1 muxes | Theory + Code | [notes/pdf_q49_mux4_using_mux2.md](notes/pdf_q49_mux4_using_mux2.md), [qa/pdf_q49/q49_mux4_from_mux2.v](qa/pdf_q49/q49_mux4_from_mux2.v) |
+| 50 | Frequency, period, propagation delay, and maximum frequency | Theory | [notes/pdf_q50_frequency_period_propagation_delay.md](notes/pdf_q50_frequency_period_propagation_delay.md) |
+| 51 | Convert decimal 13 to binary, hexadecimal, and octal | Theory | [notes/pdf_q51_decimal_13_conversions.md](notes/pdf_q51_decimal_13_conversions.md) |
