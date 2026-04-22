@@ -1,5 +1,28 @@
 # PDF Q34) How would you synchronize a data bus instead?
 
+## Index
+
+1. [Direct answer](#direct-answer): short answer for why not to synchronize every bus bit separately.
+2. [Short discussion takeaway](#short-discussion-takeaway): main idea of holding the bus stable and synchronizing only handshake bits.
+3. [Deep reason behind this statement](#deep-reason-behind-this-statement): why a two-flop synchronizer works for one bit but not for bus consistency.
+4. [Why different bits can arrive in different cycles](#why-different-bits-can-arrive-in-different-cycles): example showing how a fake mixed bus value can appear.
+5. [Important distinction](#important-distinction): why delay is acceptable for one control bit but wrong for a multi-bit bus.
+6. [Why bit-by-bit synchronization is wrong](#why-bit-by-bit-synchronization-is-wrong): direct explanation of invalid mixed values.
+7. [Correct circuit idea](#correct-circuit-idea): source hold register, request sync, destination capture, acknowledge return.
+8. [How can one control signal tell that the bus is stable?](#how-can-one-control-signal-tell-that-the-bus-is-stable): protocol promise behind `req`, `src_hold`, and `ack`.
+9. [What if the original bus is changing fast?](#what-if-the-original-bus-is-changing-fast): why the raw changing bus must first be captured into `src_hold`.
+10. [What if individual bits inside `src_data` change too fast?](#what-if-individual-bits-inside-src_data-change-too-fast): source-side timing problem before the CDC handshake.
+11. [Is that still a CDC problem?](#is-that-still-a-cdc-problem): difference between same-`src_clk` timing and another asynchronous CDC before this block.
+12. [What if data arrives faster than the handshake?](#what-if-data-arrives-faster-than-the-handshake): when to wait, drop, or use an asynchronous FIFO.
+13. [What if timing constraints do not match?](#what-if-timing-constraints-do-not-match): protocol correctness versus physical timing correctness.
+14. [Step-by-step operation](#step-by-step-operation): six-step flow from source capture to source release.
+15. [Verilog example](#verilog-example): complete toggle-handshake Verilog module with variable-role comments.
+16. [Realization](#realization): simple mental model for `req_src`, `ack_dst`, and toggle-based transfer detection.
+17. [Why this is safe](#why-this-is-safe): summary of why stable bus plus synchronized control works.
+18. [Important timing note](#important-timing-note): real implementation constraints and CDC attributes.
+19. [When to use an asynchronous FIFO instead](#when-to-use-an-asynchronous-fifo-instead): higher-throughput bus crossing case.
+20. [Interview answer](#interview-answer): concise final answer for interviews.
+
 ## Direct answer
 
 Do **not** synchronize every bit of a multi-bit bus using separate two-flop synchronizers.
