@@ -1,8 +1,10 @@
-﻿# Verilog Revision - Course Videos 1 and 2
+﻿# Verilog Revision - Course Videos 1 to 3
 
 Video 1: [Introduction to Verilog: Modules, Number Representations & Comments](https://www.youtube.com/watch?v=IP_8QJ5k2I8)
 
 Video 2: [Verilog Data Types Explained | reg, net, integer, real, time](https://www.youtube.com/watch?v=R57WWiEqkLQ)
+
+Video 3: [Port Connection Rules in Verilog | Connect by Order vs Connect by Name Explained](https://www.youtube.com/watch?v=C219U48xX04)
 
 Note on screenshots: I did not embed every slide screenshot from the videos because that would recreate the creator's slide deck. Instead, each video has timestamp links to the exact slide/topic positions, followed by original revision notes, examples, pitfalls, and quizzes.
 
@@ -34,6 +36,18 @@ Caption cleanup used in this note: "vlog" means Verilog, "FPJ" means FPGA, "Vado
 - [V2-10) Width Mismatch Interview Traps](#v2-10-width-mismatch-interview-traps)
 - [V2-11) Video 2 Points To Remember](#v2-11-video-2-points-to-remember)
 - [V2-12) Video 2 Quiz](#v2-12-video-2-quiz)
+- [Video 3 Timestamp Index](#video-3-timestamp-index)
+- [V3-1) Why Port Connection Rules Matter](#v3-1-why-port-connection-rules-matter)
+- [V3-2) Testbench, DUT, Stimulus, And Response](#v3-2-testbench-dut-stimulus-and-response)
+- [V3-3) Data Type Rules For Ports](#v3-3-data-type-rules-for-ports)
+- [V3-4) Outside Signals That Connect To Ports](#v3-4-outside-signals-that-connect-to-ports)
+- [V3-5) Connect By Name](#v3-5-connect-by-name)
+- [V3-6) Connect By Order](#v3-6-connect-by-order)
+- [V3-7) Full Adder Using Two Half Adders](#v3-7-full-adder-using-two-half-adders)
+- [V3-8) Width Mismatch During Port Connection](#v3-8-width-mismatch-during-port-connection)
+- [V3-9) Empty And Unconnected Ports](#v3-9-empty-and-unconnected-ports)
+- [V3-10) Video 3 Points To Remember](#v3-10-video-3-points-to-remember)
+- [V3-11) Video 3 Quiz](#v3-11-video-3-quiz)
 - [Deep Revision Addendum](#deep-revision-addendum)
 - [D1) The Real Hardware Meaning Of Verilog Objects](#d1-the-real-hardware-meaning-of-verilog-objects)
 - [D2) Continuous Assignment vs Procedural Assignment](#d2-continuous-assignment-vs-procedural-assignment)
@@ -50,6 +64,7 @@ Caption cleanup used in this note: "vlog" means Verilog, "FPJ" means FPGA, "Vado
 | --- | --- | --- | --- |
 | 1 | [Modules, Number Representations & Comments](https://www.youtube.com/watch?v=IP_8QJ5k2I8) | 40:36 | HDL mindset, EDA tools, modules, ports, identifiers, abstraction levels, number literals, strings, comments. |
 | 2 | [Verilog Data Types Explained](https://www.youtube.com/watch?v=R57WWiEqkLQ) | 49:05 | `net`, `wire`, `wor`, `wand`, `reg`, `integer`, `real`, `time`, vectors, slicing, width mismatch. |
+| 3 | [Port Connection Rules in Verilog](https://www.youtube.com/watch?v=C219U48xX04) | 46:45 | Testbench/DUT connections, port data type rules, connect by name, connect by order, instantiation, width mismatch, empty ports. |
 
 ## Video 1 Timestamp Index
 
@@ -1492,6 +1507,820 @@ That is only 1-bit arithmetic.
 14. `1'b0`, because decimal 4 is binary `100`, and only the LSB fits.
 15. All variables are 1 bit, so multi-bit arithmetic is lost before or during the addition.
 
+## Video 3 Timestamp Index
+
+| No. | Topic | Timestamp Link | Revision Purpose |
+| --- | --- | --- | --- |
+| 1 | Recap of modules, data types, vectors, slicing | [00:00](https://www.youtube.com/watch?v=C219U48xX04&t=0s) | Connect previous lectures to port connection rules. |
+| 2 | Start of port connection rules | [01:20](https://www.youtube.com/watch?v=C219U48xX04&t=80s) | Understand why module connections are a major beginner issue. |
+| 3 | Testbench and DUT idea | [02:00](https://www.youtube.com/watch?v=C219U48xX04&t=120s) | Testbench drives inputs and checks outputs. |
+| 4 | Example stimulus for full adder | [03:00](https://www.youtube.com/watch?v=C219U48xX04&t=180s) | Inputs produce expected sum/carry outputs. |
+| 5 | Input port default data type | [04:20](https://www.youtube.com/watch?v=C219U48xX04&t=260s) | Input ports are net type by default in classic Verilog. |
+| 6 | Why `input reg` is not accepted in Verilog | [06:00](https://www.youtube.com/watch?v=C219U48xX04&t=360s) | Inputs are driven from outside, so they behave as driven connections. |
+| 7 | Output port default data type | [07:15](https://www.youtube.com/watch?v=C219U48xX04&t=435s) | Output defaults to net; can be declared `output reg` if assigned procedurally inside. |
+| 8 | Testbench signals driving DUT inputs | [09:00](https://www.youtube.com/watch?v=C219U48xX04&t=540s) | Actual signals connected to input ports may be `reg` or net depending on source. |
+| 9 | Testbench signals receiving DUT outputs | [12:30](https://www.youtube.com/watch?v=C219U48xX04&t=750s) | In classic Verilog, output actuals should be nets. |
+| 10 | Inout port rule | [15:20](https://www.youtube.com/watch?v=C219U48xX04&t=920s) | `inout` is net on both sides. |
+| 11 | Connection by name vs order | [16:00](https://www.youtube.com/watch?v=C219U48xX04&t=960s) | Two ways to instantiate modules. |
+| 12 | Full adder using half adders diagram | [17:00](https://www.youtube.com/watch?v=C219U48xX04&t=1020s) | See module-to-module wiring. |
+| 13 | How many internal wires are needed | [18:00](https://www.youtube.com/watch?v=C219U48xX04&t=1080s) | Three internal connections: intermediate sum and two carries. |
+| 14 | Half adder instance by name | [21:00](https://www.youtube.com/watch?v=C219U48xX04&t=1260s) | `.formal(actual)` syntax. |
+| 15 | No order restriction in named connection | [26:20](https://www.youtube.com/watch?v=C219U48xX04&t=1580s) | Named connection is safer for large modules. |
+| 16 | Connection by order | [28:00](https://www.youtube.com/watch?v=C219U48xX04&t=1680s) | Actuals connect positionally to the module header order. |
+| 17 | Ordered connection mistake example | [30:00](https://www.youtube.com/watch?v=C219U48xX04&t=1800s) | Wrong order silently connects wrong signals. |
+| 18 | Multi-module data type exercise | [32:00](https://www.youtube.com/watch?v=C219U48xX04&t=1920s) | Decide which signals must be nets and which can be regs. |
+| 19 | Port width mismatch | [37:00](https://www.youtube.com/watch?v=C219U48xX04&t=2220s) | Wider actual to narrower formal connects/truncates lower bits. |
+| 20 | Unconnected input ports | [40:00](https://www.youtube.com/watch?v=C219U48xX04&t=2400s) | Inputs should not be left floating in an instance. |
+| 21 | Unconnected output ports | [42:00](https://www.youtube.com/watch?v=C219U48xX04&t=2520s) | Outputs can be intentionally left unconnected with empty actuals. |
+| 22 | Empty arguments vs missing arguments | [44:00](https://www.youtube.com/watch?v=C219U48xX04&t=2640s) | Empty commas count as arguments; omitted arguments cause errors. |
+
+## V3-1) Why Port Connection Rules Matter
+
+Modules are only useful when they can connect to other modules. A module's internal logic may be correct, but the complete design can still fail if the ports are connected incorrectly.
+
+Port connection rules answer these questions:
+
+```text
+1. What data type should a module port have?
+2. What data type should the outside signal connected to that port have?
+3. How do I instantiate one module inside another?
+4. What happens if the port widths do not match?
+5. What happens if I leave a port unconnected?
+```
+
+This is important because Verilog often accepts legal-but-wrong code. A connection may compile but still connect the wrong signal or silently drop upper bits.
+
+The safest habit:
+
+```text
+Use named port connection.
+Use clear internal wire names.
+Match signal widths intentionally.
+Never leave inputs floating.
+Leave outputs unconnected only intentionally.
+```
+
+## V3-2) Testbench, DUT, Stimulus, And Response
+
+The lecture uses a design inside a testbench to explain connections.
+
+Vocabulary:
+
+| Term | Meaning |
+| --- | --- |
+| DUT | Design Under Test. This is the module you want to verify. |
+| Testbench | A module that drives inputs into the DUT and checks outputs. |
+| Stimulus | Input values applied to the DUT. |
+| Response | Output values produced by the DUT. |
+| Expected value | The result you believe the DUT should produce. |
+
+For a full adder:
+
+```text
+inputs:  a, b, cin
+outputs: sum, carry
+```
+
+If:
+
+```text
+a=0, b=1, cin=1
+```
+
+then:
+
+```text
+0 + 1 + 1 = 2 decimal = binary 10
+sum   = 0
+carry = 1
+```
+
+The testbench drives `a`, `b`, `cin`, then observes `sum` and `carry`. If the observed result matches the expected result, that test case passes.
+
+Basic testbench shape:
+
+```verilog
+module full_adder_tb;
+    reg a_tb;
+    reg b_tb;
+    reg cin_tb;
+    wire sum_tb;
+    wire carry_tb;
+
+    full_adder dut (
+        .a(a_tb),
+        .b(b_tb),
+        .cin(cin_tb),
+        .sum(sum_tb),
+        .carry(carry_tb)
+    );
+
+    initial begin
+        a_tb = 1'b0;
+        b_tb = 1'b1;
+        cin_tb = 1'b1;
+        #1;
+        $display("sum=%b carry=%b", sum_tb, carry_tb);
+    end
+endmodule
+```
+
+Why inputs are `reg` in the testbench:
+
+```text
+The testbench assigns values procedurally inside an initial block.
+Classic Verilog procedural assignment needs a reg variable.
+```
+
+Why outputs are `wire` in the testbench:
+
+```text
+The DUT output continuously drives the testbench observation signal.
+So the receiver side should be a net in classic Verilog.
+```
+
+## V3-3) Data Type Rules For Ports
+
+Classic Verilog port rules are easier if you separate the inside of the module from the outside connection.
+
+### Input Ports
+
+Example:
+
+```verilog
+module design_a(
+    input a,
+    input b
+);
+endmodule
+```
+
+Inside `design_a`, `a` and `b` are input ports. In classic Verilog, an input port is a net by default.
+
+Beginner-safe rule:
+
+```text
+input ports are driven from outside the module, so treat them as nets inside the module.
+```
+
+Do not write this in classic Verilog:
+
+```verilog
+module bad(
+    input reg a
+);
+endmodule
+```
+
+Reason:
+
+```text
+The input is not stored by the module. It is driven from the outside.
+```
+
+### Output Ports
+
+Output ports can be net-like or variable-like depending on how you drive them inside the module.
+
+Continuous assignment style:
+
+```verilog
+module and_gate(
+    input wire a,
+    input wire b,
+    output wire y
+);
+    assign y = a & b;
+endmodule
+```
+
+Here `y` is a net because `assign` continuously drives it.
+
+Procedural assignment style:
+
+```verilog
+module mux2(
+    input wire a,
+    input wire b,
+    input wire sel,
+    output reg y
+);
+    always @(*) begin
+        if (sel)
+            y = b;
+        else
+            y = a;
+    end
+endmodule
+```
+
+Here `y` is `output reg` because it is assigned inside an `always` block.
+
+Important:
+
+```text
+output reg does not automatically mean flip-flop.
+It only means the output is assigned procedurally.
+```
+
+### Inout Ports
+
+`inout` ports are bidirectional. They must behave as nets because either side may drive or release the connection.
+
+Example:
+
+```verilog
+module tri_buf(
+    input wire en,
+    input wire data,
+    inout wire bus
+);
+    assign bus = en ? data : 1'bz;
+endmodule
+```
+
+Use `inout` carefully. Most beginner RTL designs avoid it except for top-level chip/FPGA pins or tri-state bus examples.
+
+## V3-4) Outside Signals That Connect To Ports
+
+Now look from the parent module or testbench side.
+
+### Connecting To DUT Inputs
+
+The outside signal connected to a DUT input can be:
+
+- `reg`, if the testbench/procedural code drives it
+- `wire`, if another module output or continuous assignment drives it
+
+Testbench-driven input:
+
+```verilog
+reg a_tb;
+
+initial begin
+    a_tb = 1'b0;
+    #10 a_tb = 1'b1;
+end
+```
+
+Module-driven input:
+
+```verilog
+wire a_net;
+
+producer u_producer (
+    .out(a_net)
+);
+
+consumer u_consumer (
+    .in(a_net)
+);
+```
+
+Here `a_net` connects two modules, so it should be a net.
+
+### Connecting To DUT Outputs
+
+In classic Verilog, a child module output should connect to a parent net:
+
+```verilog
+wire y_tb;
+
+and_gate dut (
+    .a(a_tb),
+    .b(b_tb),
+    .y(y_tb)
+);
+```
+
+Do not use a parent `reg` as the driven target of a module output in Verilog-2005 style:
+
+```verilog
+reg y_tb;          // not beginner-safe classic Verilog
+and_gate dut (..., .y(y_tb));
+```
+
+Reason:
+
+```text
+The child module output continuously drives the outside signal.
+The outside signal must be able to receive a continuous/module driver.
+```
+
+### Compact Rule Table
+
+| Port On Child Module | Inside Child Module | Outside Signal In Parent/Testbench |
+| --- | --- | --- |
+| `input` | net | `reg` if testbench drives it, or net if another module drives it |
+| `output` with `assign` | net | net |
+| `output reg` with `always` | reg inside child | net outside child |
+| `inout` | net | net |
+
+For your current course, memorize this table.
+
+## V3-5) Connect By Name
+
+Connect by name uses this syntax:
+
+```verilog
+module_name instance_name (
+    .formal_port(actual_signal),
+    .formal_port(actual_signal)
+);
+```
+
+Example:
+
+```verilog
+half_adder ha1 (
+    .a(a_fa),
+    .b(b_fa),
+    .sum(w1),
+    .carry(w2)
+);
+```
+
+Meaning:
+
+```text
+half_adder port a     connects to a_fa
+half_adder port b     connects to b_fa
+half_adder port sum   connects to w1
+half_adder port carry connects to w2
+```
+
+The names before the parentheses are the child module's formal port names. The signals inside the parentheses are the parent module's actual signals.
+
+```text
+.a(a_fa)
+ ^  ^
+ |  parent/full-adder signal
+ child/half-adder port
+```
+
+### Why Named Connection Is Safer
+
+With named connection, order does not matter:
+
+```verilog
+half_adder ha1 (
+    .carry(w2),
+    .sum(w1),
+    .b(b_fa),
+    .a(a_fa)
+);
+```
+
+This still connects correctly because each actual signal is tied to a named formal port.
+
+Best practice:
+
+```text
+Use named connection for nearly all real RTL.
+```
+
+It is easier to review, safer when modules have many ports, and less likely to break if the module header changes.
+
+## V3-6) Connect By Order
+
+Connect by order uses only actual signals:
+
+```verilog
+half_adder ha1 (a_fa, b_fa, w1, w2);
+```
+
+This depends entirely on the child module port declaration order.
+
+If the child module is:
+
+```verilog
+module half_adder(
+    input wire a,
+    input wire b,
+    output wire sum,
+    output wire carry
+);
+```
+
+then:
+
+```verilog
+half_adder ha1 (a_fa, b_fa, w1, w2);
+```
+
+means:
+
+```text
+a_fa -> a
+b_fa -> b
+w1   -> sum
+w2   -> carry
+```
+
+### Ordered Connection Trap
+
+Wrong:
+
+```verilog
+half_adder ha1 (b_fa, a_fa, w2, w1);
+```
+
+This compiles if widths and directions are compatible, but it connects:
+
+```text
+b_fa -> a
+a_fa -> b
+w2   -> sum
+w1   -> carry
+```
+
+For a symmetric half adder, swapping `a` and `b` may not change the function, but swapping `sum` and `carry` is a real bug.
+
+For large modules, connect-by-order is dangerous.
+
+Use connect-by-order only when:
+
+- the module has very few ports
+- you are doing a quick throwaway test
+- the order is obvious and stable
+
+For revision and interviews, prefer connect-by-name.
+
+## V3-7) Full Adder Using Two Half Adders
+
+A full adder can be built from:
+
+- two half adders
+- one OR gate
+
+Logic:
+
+```text
+First half adder:
+    a_fa + b_fa -> intermediate sum w1 and carry w2
+
+Second half adder:
+    w1 + cin_fa -> final sum sum_fa and carry w3
+
+OR gate:
+    carry_fa = w2 | w3
+```
+
+Why three internal wires:
+
+| Wire | Meaning |
+| --- | --- |
+| `w1` | Sum output of first half adder, input to second half adder. |
+| `w2` | Carry output of first half adder, input to OR gate. |
+| `w3` | Carry output of second half adder, input to OR gate. |
+
+### Half Adder Module
+
+```verilog
+module half_adder(
+    input wire a,
+    input wire b,
+    output wire sum,
+    output wire carry
+);
+    assign sum = a ^ b;
+    assign carry = a & b;
+endmodule
+```
+
+### Full Adder With Named Connection
+
+```verilog
+module full_adder(
+    input wire a_fa,
+    input wire b_fa,
+    input wire cin_fa,
+    output wire sum_fa,
+    output wire carry_fa
+);
+    wire w1;
+    wire w2;
+    wire w3;
+
+    half_adder ha1 (
+        .a(a_fa),
+        .b(b_fa),
+        .sum(w1),
+        .carry(w2)
+    );
+
+    half_adder ha2 (
+        .a(w1),
+        .b(cin_fa),
+        .sum(sum_fa),
+        .carry(w3)
+    );
+
+    assign carry_fa = w2 | w3;
+endmodule
+```
+
+Hardware meaning:
+
+```text
+ha1 is one physical/logic instance of half_adder.
+ha2 is a second physical/logic instance of half_adder.
+w1, w2, w3 are internal connections.
+```
+
+Do not think "calling a function." Module instantiation creates hardware structure.
+
+### Same Full Adder With Ordered Connection
+
+```verilog
+module full_adder_ordered(
+    input wire a_fa,
+    input wire b_fa,
+    input wire cin_fa,
+    output wire sum_fa,
+    output wire carry_fa
+);
+    wire w1;
+    wire w2;
+    wire w3;
+
+    half_adder ha1 (a_fa, b_fa, w1, w2);
+    half_adder ha2 (w1, cin_fa, sum_fa, w3);
+
+    assign carry_fa = w2 | w3;
+endmodule
+```
+
+This works only because the order matches:
+
+```text
+(a, b, sum, carry)
+```
+
+If the half adder module header changes, ordered instantiations can break silently.
+
+## V3-8) Width Mismatch During Port Connection
+
+Port width mismatch is the same core problem as assignment width mismatch.
+
+Example:
+
+```verilog
+module child(
+    input wire m
+);
+endmodule
+
+module top;
+    wire [3:0] m_b;
+
+    child u_child (
+        .m(m_b)
+    );
+endmodule
+```
+
+The child formal port `m` is 1 bit. The parent actual signal `m_b` is 4 bits.
+
+Beginner mental picture:
+
+```text
+m_b[3] m_b[2] m_b[1] m_b[0]
+                        |
+                        m
+```
+
+Only the least significant bit connects to the 1-bit formal port.
+
+The upper bits are not connected to that child input.
+
+Better:
+
+```verilog
+child u_child (
+    .m(m_b[0])
+);
+```
+
+This makes the truncation intentional.
+
+If the child really needs all four bits:
+
+```verilog
+module child(
+    input wire [3:0] m
+);
+endmodule
+```
+
+### Narrow Actual To Wide Formal
+
+Example:
+
+```verilog
+module child(
+    input wire [3:0] bus
+);
+endmodule
+
+module top;
+    wire one_bit_signal;
+
+    child u_child (
+        .bus(one_bit_signal)
+    );
+endmodule
+```
+
+Now the child expects 4 bits but the parent gives 1 bit. Tools may extend the value, but this is not a good habit. Make the intent explicit:
+
+```verilog
+child u_child (
+    .bus({3'b000, one_bit_signal})
+);
+```
+
+Or fix the child port width.
+
+### Practical Port Width Checklist
+
+Before instantiating a module:
+
+```text
+1. Read the child module header.
+2. Write down each formal port width.
+3. Check each actual signal width in the parent.
+4. If widths differ, use explicit slicing or concatenation.
+5. Do not rely on silent truncation/extension.
+```
+
+## V3-9) Empty And Unconnected Ports
+
+There are two different ideas:
+
+```text
+empty argument:   a comma placeholder exists, but no signal is connected
+missing argument: the port position is not provided at all
+```
+
+### Empty Output Port
+
+Suppose:
+
+```verilog
+module design(
+    input wire a,
+    input wire b,
+    output wire x,
+    output wire y
+);
+endmodule
+```
+
+With ordered connection:
+
+```verilog
+design d2 (m, n, , );
+```
+
+This provides four argument positions:
+
+```text
+m -> a
+n -> b
+empty -> x
+empty -> y
+```
+
+Leaving outputs unconnected is allowed when you intentionally do not need those outputs.
+
+Named version:
+
+```verilog
+design d2 (
+    .a(m),
+    .b(n),
+    .x(),
+    .y()
+);
+```
+
+This is clearer.
+
+### Empty Input Port
+
+Do not leave required inputs unconnected:
+
+```verilog
+design d1 (, , x_top, y_top);
+```
+
+The input ports `a` and `b` are floating. In real design practice, this is wrong. Some tools error, some warn, some allow it but simulate as `z` or `x` behavior downstream.
+
+Correct:
+
+```verilog
+design d1 (m, n, x_top, y_top);
+```
+
+or tie off unused inputs:
+
+```verilog
+design d1 (
+    .a(1'b0),
+    .b(n),
+    .x(x_top),
+    .y(y_top)
+);
+```
+
+### Missing Arguments
+
+Wrong:
+
+```verilog
+design d3 (m, n);
+```
+
+If the module has four ports and you provide only two ordered actuals, the instantiation does not provide all argument positions. This is not the same as giving empty placeholders for the remaining output ports.
+
+For ordered connection, if you intentionally skip outputs:
+
+```verilog
+design d3 (m, n, , );
+```
+
+For named connection:
+
+```verilog
+design d3 (
+    .a(m),
+    .b(n),
+    .x(),
+    .y()
+);
+```
+
+Named connection is much clearer.
+
+## V3-10) Video 3 Points To Remember
+
+- A testbench is also a Verilog module.
+- The testbench drives DUT inputs and observes DUT outputs.
+- DUT input ports are nets inside the DUT in classic Verilog.
+- DUT outputs default to net, but can be `output reg` if assigned procedurally inside the DUT.
+- Signals connected to DUT inputs can be testbench `reg` variables or nets from other modules.
+- Signals connected to DUT outputs should be nets in classic Verilog.
+- `inout` ports should be nets on both sides.
+- Module instantiation creates hardware structure, not a software function call.
+- Connect by name uses `.formal(actual)`.
+- Connect by order depends on the exact module header order.
+- Connect by name is safer and preferred for real RTL.
+- Internal wires are needed when connecting one submodule output to another submodule input.
+- Width mismatches may compile but silently drop or extend bits.
+- Use explicit slicing like `bus[0]` or concatenation like `{3'b000, sig}` when widths differ.
+- Do not leave inputs floating.
+- Outputs can be left unconnected intentionally with empty actuals.
+- Empty arguments and missing arguments are not the same thing.
+
+## V3-11) Video 3 Quiz
+
+### Questions
+
+1. What is a DUT?
+2. Why does a testbench usually declare DUT input drivers as `reg`?
+3. Why should DUT output receiver signals be `wire` in classic Verilog?
+4. Can an input port be declared `input reg` in classic Verilog?
+5. When do you declare an output as `output reg`?
+6. What is the syntax of connect by name?
+7. Why is connect by name safer than connect by order?
+8. How many internal wires are needed for a full adder made from two half adders and one OR gate?
+9. In the full adder structure, what does `w1` usually carry?
+10. If a 4-bit actual connects to a 1-bit formal input, which bit usually connects?
+11. Is leaving an output unconnected allowed?
+12. Should you leave inputs unconnected?
+13. What is the difference between `design d3 (m, n);` and `design d3 (m, n, , );`?
+14. What does `.sum(w1)` mean?
+15. Is module instantiation the same as calling a function?
+
+### Answers
+
+1. Design Under Test.
+2. Because the testbench drives them procedurally inside an `initial` or `always` block.
+3. Because the DUT output drives that outside signal like a continuous/module driver.
+4. No, not in classic Verilog style.
+5. When the output is assigned inside a procedural block such as `always @(*)` or `always @(posedge clk)`.
+6. `.formal_port(actual_signal)`.
+7. It explicitly names each child port, so order changes or many ports are less likely to create wrong connections.
+8. Three: intermediate sum, carry from first half adder, carry from second half adder.
+9. The sum output of the first half adder.
+10. The least significant bit.
+11. Yes, if intentionally unused.
+12. No. Tie them to a known value or connect them properly.
+13. The first provides only two arguments; the second provides four positions with the last two intentionally empty.
+14. The child module's `sum` port is connected to the parent signal `w1`.
+15. No. Instantiation creates another hardware instance.
+
 ## Deep Revision Addendum
 
 This section connects the first two videos into the mental model you need for writing correct RTL and answering interview questions. The videos introduce syntax, but syntax alone is not enough. Verilog bugs usually happen when the code looks legal but the hardware meaning is different from what you imagined.
@@ -2311,6 +3140,79 @@ module half_adder(
 endmodule
 ```
 
+### Full Adder By Half Adder Instantiation
+
+```verilog
+module full_adder(
+    input wire a_fa,
+    input wire b_fa,
+    input wire cin_fa,
+    output wire sum_fa,
+    output wire carry_fa
+);
+    wire w1;
+    wire w2;
+    wire w3;
+
+    half_adder ha1 (
+        .a(a_fa),
+        .b(b_fa),
+        .sum(w1),
+        .carry(w2)
+    );
+
+    half_adder ha2 (
+        .a(w1),
+        .b(cin_fa),
+        .sum(sum_fa),
+        .carry(w3)
+    );
+
+    assign carry_fa = w2 | w3;
+endmodule
+```
+
+### Full Adder Port Connection Testbench
+
+```verilog
+module full_adder_tb;
+    reg a_tb;
+    reg b_tb;
+    reg cin_tb;
+    wire sum_tb;
+    wire carry_tb;
+
+    full_adder dut (
+        .a_fa(a_tb),
+        .b_fa(b_tb),
+        .cin_fa(cin_tb),
+        .sum_fa(sum_tb),
+        .carry_fa(carry_tb)
+    );
+
+    initial begin
+        a_tb = 1'b0;
+        b_tb = 1'b1;
+        cin_tb = 1'b1;
+        #1;
+        $display("0 + 1 + 1 -> sum=%b carry=%b", sum_tb, carry_tb);
+
+        a_tb = 1'b1;
+        b_tb = 1'b1;
+        cin_tb = 1'b1;
+        #1;
+        $display("1 + 1 + 1 -> sum=%b carry=%b", sum_tb, carry_tb);
+    end
+endmodule
+```
+
+Expected idea:
+
+```text
+0 + 1 + 1 -> sum=0 carry=1
+1 + 1 + 1 -> sum=1 carry=1
+```
+
 ### Literal And Width Testbench
 
 ```verilog
@@ -2408,6 +3310,7 @@ a[2:0] = 011
 
 - Video 1 used for lecture sequence and timestamps: [Introduction to Verilog](https://www.youtube.com/watch?v=IP_8QJ5k2I8)
 - Video 2 used for lecture sequence and timestamps: [Verilog Data Types Explained](https://www.youtube.com/watch?v=R57WWiEqkLQ)
+- Video 3 used for lecture sequence and timestamps: [Port Connection Rules in Verilog](https://www.youtube.com/watch?v=C219U48xX04)
 - Verilog HDL is standardized in IEEE 1364. The 2001 revision is IEEE Std 1364-2001: [IEEE 1364-2001](https://ieeexplore.ieee.org/document/954909)
 - IEEE Std 1364-2005 defines the Verilog HDL standard: [IEEE 1364-2005](https://ieeexplore.ieee.org/document/1620780)
 - The Verilog examples in this note were syntax-checked with Icarus Verilog. Some examples intentionally produce truncation warnings because they demonstrate width-loss pitfalls.
