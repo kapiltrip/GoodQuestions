@@ -33,6 +33,10 @@ This file now holds the actionable items that were previously mixed into `revisi
   - when to use `function`
   - input/output/inout arguments
   - synthesizable vs testbench-style usage
+- Review 3-input XOR and 3-input XNOR gate properties:
+  - when 3-input XOR outputs `1` vs `0`
+  - when 3-input XNOR outputs `1` vs `0`
+  - relation to odd/even number of `1`s
 - Review shift-register history conventions:
   - left-shift-style and right-shift-style history storage are both valid
   - newest bit at LSB vs newest bit at MSB

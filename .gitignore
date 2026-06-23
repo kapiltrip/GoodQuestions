@@ -1,0 +1,5 @@
+.private/
+.codex_spreadsheet_work/
+~$*.xlsx
+xvlog.log
+xvlog.pb
